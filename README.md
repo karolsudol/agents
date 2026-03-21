@@ -3,16 +3,17 @@
 
 Sample agents demo: A2A + ADK + MCP + RAG + Clean multi-lang structure.
 
-## Python Setup
-We use `uv` for Python dependency management and the Google Agent Development Kit (ADK).
-
+## Setup
 1.  **Environment Setup**:
     ```bash
     make setup
     make install-precommit
     ```
 2.  **API Key**:
-    Copy `python/.env.example` to `python/agents/intro_demo/.env` (or a global `.env`) and add your `GOOGLE_API_KEY`.
+    Copy `.env.example` to `.env` at the root and add your `GOOGLE_API_KEY`. This key will be shared by both Python and Go agents.
+    ```bash
+    cp .env.example .env
+    ```
 
 ## Managing Agents
 - **List all agents**: `make list-agents`
