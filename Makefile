@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell
+.PHONY: install setup install-precommit lint activate shell run-demo serve-demo list-agents run-agent add-dep
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -26,7 +26,37 @@ shell:
 	@echo "Dropping into a shell with the virtual environment activated..."
 	cd python && uv run bash
 
+list-agents:
+	@echo "Available Python agents:"
+	@ls -d python/agents/*/ | xargs -n 1 basename
+
+run-agent:
+	@if [ -z "$(NAME)" ]; then \
+		echo "Usage: make run-agent NAME=agent_directory_name"; \
+		make list-agents; \
+	else \
+		echo "Running agent $(NAME)..."; \
+		cd python && uv run adk run agents/$(NAME); \
+	fi
+
+add-dep:
+	@if [ -z "$(PKG)" ]; then \
+		echo "Usage: make add-dep PKG=package_name"; \
+	else \
+		echo "Installing $(PKG) with uv..."; \
+		cd python && uv add $(PKG); \
+	fi
+
+run-demo:
+	@$(MAKE) run-agent NAME=intro_demo
+
+serve-demo:
+	@echo "Serving the intro_demo agent web interface on port 8000..."
+	cd python && uv run adk web agents/intro_demo --port 8000
+
 lint:
 	cd python && uv run ruff check . --fix
 	cd python && uv run ruff format .
+
+
 

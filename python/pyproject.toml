@@ -5,5 +5,6 @@ description = "Clean multi-lang AI agents"
 dependencies = [
     "ruff",
     "pre-commit",
+    "google-adk",
 ]
 requires-python = ">=3.10"
