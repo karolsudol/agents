@@ -17,7 +17,9 @@ Sample agents demo: A2A + ADK + MCP + RAG + Clean multi-lang structure.
 
 ## Managing Agents
 - **List all agents**: `make list-agents`
-- **Run a specific agent**: `make run-agent NAME=intro_demo`
+- **Run Single Tool Agent**: `make run-single`
+- **Run Multi Tool Agent**: `make run-multi`
+- **Serve Web UI**: `make serve-agents`
 - **Add a Python dependency**: `make add-dep PKG=requests`
 
 To activate the virtual environment:
@@ -28,22 +30,9 @@ make activate
 make shell
 ```
 
-
-## Running the ADK Demo Agent
-1. Add your `GOOGLE_API_KEY` to `python/agents/intro_demo/.env`.
-2. Run the agent in the CLI:
-   ```bash
-   make run-demo
-   ```
-3. Or launch the web interface:
-   ```bash
-   make serve-demo
-   ```
-
 ## Structure
 - `python/agents`: Python-based AI agents (ADK).
-  - `intro_demo`: A sample agent using ADK with a time-telling tool.
+  - `single_tool_agent`: Simple agent using a time-telling tool.
+  - `multi_tool_agent`: Agent with both time and weather tools.
 - `python/notebooks`: Colab notebooks.
 - `go/agents`: Go-based AI agents.
-
-
