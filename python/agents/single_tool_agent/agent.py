@@ -18,7 +18,7 @@ def get_current_time(city: str) -> dict[str, str]:
             "berlin": "Europe/Berlin",
             "warsaw": "Europe/Warsaw",
         }
-        
+
         timezone_str = city_to_tz.get(city.lower(), "UTC")
         timezone = pytz.timezone(timezone_str)
         now = datetime.datetime.now(timezone)
@@ -27,7 +27,7 @@ def get_current_time(city: str) -> dict[str, str]:
             "city": city,
             "timezone": timezone_str,
             "time": now.strftime("%I:%M %p"),
-            "date": now.strftime("%Y-%m-%d")
+            "date": now.strftime("%Y-%m-%d"),
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -35,7 +35,7 @@ def get_current_time(city: str) -> dict[str, str]:
 
 root_agent = Agent(
     model="gemini-2.5-flash",
-    name="time_teller",
+    name="single_tool_agent",
     description="Tells the current time in a specified city.",
     instruction="You are a helpful assistant that tells the current time in cities. Use the 'get_current_time' tool for this purpose.",
     tools=[get_current_time],
