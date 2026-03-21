@@ -1,0 +1,9 @@
+[project]
+name = "agents"
+version = "0.1.0"
+description = "Clean multi-lang AI agents"
+dependencies = [
+    "ruff",
+    "pre-commit",
+]
+requires-python = ">=3.10"
