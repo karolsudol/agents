@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi serve-agents list-agents run-agent add-dep
+.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal serve-agents list-agents run-agent add-dep
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -52,6 +52,9 @@ run-single:
 
 run-multi:
 	@$(MAKE) run-agent NAME=multi_tool_agent
+
+run-multimodal:
+	@$(MAKE) run-agent NAME=multimodal_agent
 
 serve-agents:
 	@echo "Serving the agents web interface on port 8000..."

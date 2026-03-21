@@ -19,6 +19,7 @@ Sample agents demo: A2A + ADK + MCP + RAG + Clean multi-lang structure.
 - **List all agents**: `make list-agents`
 - **Run Single Tool Agent**: `make run-single`
 - **Run Multi Tool Agent**: `make run-multi`
+- **Run Multimodal Agent**: `make run-multimodal`
 - **Serve Web UI**: `make serve-agents`
 - **Add a Python dependency**: `make add-dep PKG=requests`
 
@@ -34,5 +35,6 @@ make shell
 - `python/agents`: Python-based AI agents (ADK).
   - `single_tool_agent`: Simple agent using a time-telling tool.
   - `multi_tool_agent`: Agent with both time and weather tools.
+  - `multimodal_agent`: Multimodal agent with an audio-analysis tool.
 - `python/notebooks`: Colab notebooks.
 - `go/agents`: Go-based AI agents.
