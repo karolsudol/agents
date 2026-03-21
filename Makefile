@@ -16,7 +16,7 @@ setup: install-uv
 
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."
-	cd python && uv run pre-commit install
+	cd python && uv run pre-commit install --config ../.pre-commit-config.yaml
 
 activate:
 	@echo "To activate the virtual environment, run:"

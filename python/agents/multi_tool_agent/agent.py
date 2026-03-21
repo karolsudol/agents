@@ -1,8 +1,9 @@
 import datetime
-import pytz
+from zoneinfo import ZoneInfo
 from google.adk.agents.llm_agent import Agent
 
-def get_weather(city: str) -> dict:
+
+def get_weather(city: str) -> dict[str, str]:
     """Retrieves the current weather report for a specified city.
 
     Args:
@@ -26,7 +27,7 @@ def get_weather(city: str) -> dict:
         }
 
 
-def get_current_time(city: str) -> dict:
+def get_current_time(city: str) -> dict[str, str]:
     """Returns the current time in a specified city.
 
     Args:
@@ -35,41 +36,25 @@ def get_current_time(city: str) -> dict:
     Returns:
         dict: status and result or error msg.
     """
-    try:
-        city_to_tz = {
-            "london": "Europe/London",
-            "new york": "America/New_York",
-            "tokyo": "Asia/Tokyo",
-            "paris": "Europe/Paris",
-            "berlin": "Europe/Berlin",
-            "warsaw": "Europe/Warsaw",
-        }
-        
-        timezone_str = city_to_tz.get(city.lower())
-        if not timezone_str:
-             return {
-                "status": "error",
-                "error_message": (
-                    f"Sorry, I don't have timezone information for {city}."
-                ),
-            }
 
-        tz = pytz.timezone(timezone_str)
-        now = datetime.datetime.now(tz)
-        report = (
-            f'The current time in {city} is {now.strftime("%Y-%m-%d %H:%M:%S %Z%z")}'
-        )
-        return {"status": "success", "report": report}
-    except Exception as e:
-        return {"status": "error", "error_message": str(e)}
+    if city.lower() == "new york":
+        tz_identifier = "America/New_York"
+    else:
+        return {
+            "status": "error",
+            "error_message": (f"Sorry, I don't have timezone information for {city}."),
+        }
+
+    tz = ZoneInfo(tz_identifier)
+    now = datetime.datetime.now(tz)
+    report = f"The current time in {city} is {now.strftime('%Y-%m-%d %H:%M:%S %Z%z')}"
+    return {"status": "success", "report": report}
 
 
 root_agent = Agent(
     model="gemini-2.5-flash",
     name="weather_time_agent",
-    description=(
-        "Agent to answer questions about the time and weather in a city."
-    ),
+    description=("Agent to answer questions about the time and weather in a city."),
     instruction=(
         "You are a helpful agent who can answer user questions about the time and weather in a city."
     ),
