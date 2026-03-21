@@ -6,5 +6,6 @@ dependencies = [
     "ruff",
     "pre-commit",
     "google-adk",
+    "mypy>=1.19.1",
 ]
 requires-python = ">=3.10"

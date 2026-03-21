@@ -1,7 +1,7 @@
 from google.adk.agents.llm_agent import Agent
 
 
-def get_current_time(city: str) -> dict:
+def get_current_time(city: str) -> dict[str, str]:
     """Returns the current time in a specified city."""
     return {"status": "success", "city": city, "time": "10:30 AM"}
 

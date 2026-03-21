@@ -57,6 +57,7 @@ serve-demo:
 lint:
 	cd python && uv run ruff check . --fix
 	cd python && uv run ruff format .
+	cd python && uv run mypy .
 
 
 
