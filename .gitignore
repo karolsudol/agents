@@ -201,6 +201,10 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
+# ADK
+.adk/
+session.db
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
