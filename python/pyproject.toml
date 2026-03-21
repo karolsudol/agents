@@ -7,5 +7,6 @@ dependencies = [
     "pre-commit",
     "google-adk",
     "mypy>=1.19.1",
+    "pytz>=2026.1.post1",
 ]
 requires-python = ">=3.10"

@@ -36,7 +36,7 @@ run-agent:
 		make list-agents; \
 	else \
 		echo "Running agent $(NAME)..."; \
-		cd python && uv run adk run agents/$(NAME); \
+		cd python && uv run --env-file ../.env adk run agents/$(NAME); \
 	fi
 
 add-dep:
@@ -51,8 +51,8 @@ run-demo:
 	@$(MAKE) run-agent NAME=time_teller
 
 serve-demo:
-	@echo "Serving the time_teller agent web interface on port 8000..."
-	cd python && uv run adk web agents/time_teller --port 8000
+	@echo "Serving the agents web interface on port 8000..."
+	cd python && uv run --env-file ../.env adk web agents --port 8000
 
 lint:
 	cd python && uv run ruff check . --fix
