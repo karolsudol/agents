@@ -18,7 +18,7 @@ def say_goodbye() -> str:
     return "Goodbye! Have a great day."
 
 
-def get_weather(city: str, tool_context: ToolContext) -> dict[str, Any]:
+def get_weather(city: str, tool_context: ToolContext) -> dict[str, str | None]:
     """Retrieves the current weather report for a specified city.
 
     Args:
@@ -55,9 +55,10 @@ def get_weather(city: str, tool_context: ToolContext) -> dict[str, Any]:
         # Key Concept: Writing back to state
         tool_context.state["last_city_checked"] = city
 
-        return {"status": "success", "report": report}
+        return {"status": "success", "report": report, "error_message": None}
 
     return {
         "status": "error",
+        "report": None,
         "error_message": f"Sorry, I don't have weather for '{city}'.",
     }
