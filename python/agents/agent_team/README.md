@@ -22,6 +22,11 @@ To start the FastAPI server on port 8000:
 make run-team-api
 ```
 
+To test the running API:
+```bash
+make test-team-api
+```
+
 #### Test with cURL
 ```bash
 curl -X POST "http://localhost:8000/chat" \

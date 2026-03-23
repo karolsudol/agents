@@ -60,6 +60,13 @@ run-team-api:
 	@echo "Starting the Agent Team FastAPI server..."
 	cd python && uv run uvicorn agents.agent_team.main:app --host 0.0.0.0 --port 8000 --reload
 
+test-team-api:
+	@echo "Testing the Agent Team API..."
+	curl -X POST "http://localhost:8000/chat" \
+		 -H "Content-Type: application/json" \
+		 -d '{"user_id": "test_user", "session_id": "test_session", "message": "Hi, I am Karol! What is the weather in Tokyo?", "temp_unit": "Celsius"}'
+	@echo "\n"
+
 serve-agents:
 	@echo "Serving the agents web interface on port 8000..."
 	cd python && uv run --env-file ../.env adk web agents --port 8000

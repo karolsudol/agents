@@ -24,22 +24,22 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 async def chat(request: ChatRequest) -> dict[str, str]:
     """Sends a message to the agent team and returns the final response."""
+    app_name = "agent_team_app"
 
     # 1. Ensure the session exists
-    try:
-        await session_service.get_session(
-            app_name="agent_team_app",
-            user_id=request.user_id,
-            session_id=request.session_id,
-        )
-    except Exception:
-        # Create a new session if it doesn't exist
+    session = await session_service.get_session(
+        app_name=app_name, user_id=request.user_id, session_id=request.session_id
+    )
 
+    if not session:
+        print(f"--- Session {request.session_id} not found. Initializing... ---")
         await initialize_session(
             user_id=request.user_id,
             session_id=request.session_id,
             initial_state={"user_preference_temperature_unit": request.temp_unit},
         )
+    else:
+        print(f"--- Using existing session {request.session_id} ---")
 
     # 2. Get the runner and prepare the message
     runner = get_runner()
