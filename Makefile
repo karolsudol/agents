@@ -120,6 +120,12 @@ seed-db: check-gcloud setup-sql-proxy
 	@set -a && . ./.env && set +a; \
 	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < sql/seed.sql
 
+# Seed Spanner
+seed-spanner: check-gcloud
+	@echo "Seeding Spanner database..."
+	@set -a && . ./.env && set +a; \
+	gcloud spanner databases execute-sql finance-db --instance=finance-instance --project=$$GOOGLE_CLOUD_PROJECT --sql="$$(cat sql/spanner_seed.sql)"
+
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."
 	cd python && uv run pre-commit install --config ../.pre-commit-config.yaml

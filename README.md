@@ -63,11 +63,20 @@ We use the **`google_ml_integration`** extension and the **`pgvector`** extensio
 2.  **Store Vectors**: Store these embeddings in a `vector(3072)` column.
 3.  **Semantic Search**: Use the `<=>` operator (cosine distance) to find the most relevant jobs based on a user's description.
 
----
+## 📂 Project Structure
 
-## 🚀 Getting Started
+- `infra/`: Terraform configuration for GCP resources (Cloud SQL, Spanner, IAM, APIs).
+- `sql/`: SQL scripts for database initialization and seeding.
+- `tools.yaml`: Configuration for the MCP Toolbox bridge.
+- `python/agents/`: Individual AI agent implementations.
+  - [**Single Tool Agent**](./python/agents/single_tool_agent/README.md): Simple agent using a time-telling tool.
+  - [**Multi Tool Agent**](./python/agents/multi_tool_agent/): Agent with both time and weather tools.
+  - [**Multimodal Agent**](./python/agents/multimodal_agent/): Audio-analysis agent.
+  - [**Agentic RAG (Cloud SQL)**](./python/agents/agent_toolbox_mcp/README.md): Advanced RAG using MCP Toolbox.
+  - [**Spanner Graph MCP**](#spanner-graph-mcp): Fraud detection using Spanner Property Graphs and MCP.
+  - [**Agent Team**](./python/agents/agent_team/README.md): Multi-agent orchestration via FastAPI.
 
-All commands must be run from the **project root directory**.
+## 🚀 Quick Start (Root Commands)
 
 ### 1. Setup & Environment
 Install required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
@@ -81,8 +90,9 @@ Provision GCP resources and seed the database.
 ```bash
 make infra-init
 make infra-apply
-# Get the password from terraform output and update .env DB_PASSWORD
+# Update .env DB_PASSWORD with the terraform output
 make seed-db
+make seed-spanner
 ```
 
 ### 3. Choose Your Execution Path
@@ -102,23 +112,36 @@ make deploy-agent
 
 ---
 
+## 🏦 Spanner Graph MCP
+This feature uses **Cloud Spanner's Property Graph** capabilities to perform fraud detection and relationship analysis.
+
+### Setup
+The infrastructure and seeding are covered in the **Quick Start** section. The Spanner MCP is configured globally via `.gemini/settings.json`.
+
+### Usage (via Gemini CLI)
+You can interact with your Spanner graph using natural language:
+```bash
+gemini "Show me all transfers from Karol to John"
+gemini "Identify potential circular transfer patterns for fraud detection"
+```
+
+---
+
 ## 💰 Cost Management
-Cloud SQL can be expensive if left running. You can "pause" the instance when not in use:
-- **Pause Instance**: `make infra-stop` (Saves CPU/Memory costs; storage still billed)
+Cloud SQL and Spanner can be expensive. You can "pause" the Cloud SQL instance when not in use:
+- **Pause Instance**: `make infra-stop`
 - **Resume Instance**: `make infra-start`
 
 ## 🧹 Cleanup
-To delete all GCP resources and clean up local artifacts:
+To delete all GCP resources (Cloud SQL, Spanner, etc.) and clean up local artifacts:
 ```bash
 make infra-destroy
 ```
 
-## 📂 Project Structure
-- `infra/`: Terraform configuration for GCP resources.
-- `sql/`: SQL scripts for database initialization and seeding.
-- `tools.yaml`: Configuration for the MCP Toolbox bridge.
-- `python/agents/`: Individual AI agent implementations.
-- `deploy/`: Dockerfiles and manifests for Cloud Run deployment.
+## 🛠️ Global Management
+- **List agents**: `make list-agents`
+- **Lint/Format**: `make lint`
+- **Add Python dependency**: `make add-dep PKG=package_name`
 
 ---
 *For detailed setup of specific agents (e.g. GCP Auth or API endpoints), refer to the READMEs in `python/agents/`.*
