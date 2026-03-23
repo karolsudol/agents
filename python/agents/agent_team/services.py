@@ -18,8 +18,8 @@ def get_runner():
 
 
 async def initialize_session(
-    user_id: str, session_id: str, initial_state: Optional[dict[Any, Any]] = None
-):
+    user_id: str, session_id: str, initial_state: Optional[dict[str, Any]] = None
+) -> Any:
     """Creates a session with initial state (e.g., user preferences)."""
     return await session_service.create_session(
         app_name="agent_team_app",

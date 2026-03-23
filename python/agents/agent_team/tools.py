@@ -18,7 +18,7 @@ def say_goodbye() -> str:
     return "Goodbye! Have a great day."
 
 
-def get_weather(city: str, tool_context: ToolContext) -> dict:
+def get_weather(city: str, tool_context: ToolContext) -> dict[str, Any]:
     """Retrieves the current weather report for a specified city.
 
     Args:

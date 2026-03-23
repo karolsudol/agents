@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Any, Optional
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models.llm_request import LlmRequest
 from google.adk.models.llm_response import LlmResponse
@@ -36,13 +36,13 @@ def block_keyword_guardrail(
 
 
 def block_paris_tool_guardrail(
-    tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext
-) -> Optional[Dict]:
+    tool: BaseTool, args: dict[str, Any], tool_context: ToolContext
+) -> Optional[dict[str, Any]]:
     """Blocks specific tool calls based on arguments."""
 
     # Let's block 'Paris' for demonstration
     if tool.name == "get_weather":
-        city = args.get("city", "").lower()
+        city = str(args.get("city", "")).lower()
         if "paris" in city:
             print("--- Guardrail: Blocking weather for Paris! ---")
             return {

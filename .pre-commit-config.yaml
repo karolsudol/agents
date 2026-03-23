@@ -22,3 +22,12 @@ repos:
       - id: mypy
         additional_dependencies: [ types-requests, types-PyYAML, types-pytz ]
         exclude: .*\.ipynb$
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright
+        entry: bash -c "cd python && uv run pyright ."
+        language: system
+        types: [ python ]
+        pass_filenames: false
+        exclude: .*\.ipynb$

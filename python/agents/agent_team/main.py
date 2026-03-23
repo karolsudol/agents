@@ -22,7 +22,7 @@ class ChatRequest(BaseModel):
 
 
 @app.post("/chat")
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest) -> dict[str, str]:
     """Sends a message to the agent team and returns the final response."""
 
     # 1. Ensure the session exists
@@ -55,9 +55,12 @@ async def chat(request: ChatRequest):
             # We look for the final response from the agent
             if event.is_final_response():
                 if event.content and event.content.parts:
-                    final_response = event.content.parts[0].text
+                    final_response = (
+                        event.content.parts[0].text
+                        or "Agent produced an empty response."
+                    )
                 elif event.actions and event.actions.escalate:
-                    final_response = f"Agent escalated: {event.error_message}"
+                    final_response = f"Agent escalated: {event.error_message or 'No error message provided.'}"
                 break
 
         return {"response": final_response}
