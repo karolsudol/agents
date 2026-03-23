@@ -48,6 +48,21 @@ The **MCP Toolbox for Databases** is a standalone server (middleware) that trans
 2.  **No-Code Tools**: You define your SQL queries and their parameters in `tools.yaml`.
 3.  **LLM Independent**: The Toolbox doesn't care which LLM you use (Gemini, Claude, GPT, etc.).
 
+## 🔍 Understanding Embeddings & Cloud SQL
+
+This project uses **In-Database Embeddings** to power semantic search for job listings.
+
+### What are Embeddings?
+Embeddings are numerical representations (vectors) of text that capture its meaning. Instead of searching for exact words (keyword search), we search for "nearby" concepts (semantic search).
+- **Model**: We use Google's `text-embedding-004`.
+- **Dimension**: Each text is converted into a **3072-dimensional** vector.
+
+### How Cloud SQL Integrates with AI
+We use the **`google_ml_integration`** extension and the **`pgvector`** extension in Cloud SQL PostgreSQL to:
+1.  **Generate Vectors**: Call Vertex AI directly from SQL using the `embedding()` function.
+2.  **Store Vectors**: Store these embeddings in a `vector(3072)` column.
+3.  **Semantic Search**: Use the `<=>` operator (cosine distance) to find the most relevant jobs based on a user's description.
+
 ---
 
 ## 🚀 Getting Started
@@ -93,7 +108,7 @@ Cloud SQL can be expensive if left running. You can "pause" the instance when no
 - **Resume Instance**: `make infra-start`
 
 ## 🧹 Cleanup
-To avoid ongoing costs, delete all GCP resources and clean up local artifacts:
+To delete all GCP resources and clean up local artifacts:
 ```bash
 make infra-destroy
 ```
@@ -104,11 +119,6 @@ make infra-destroy
 - `tools.yaml`: Configuration for the MCP Toolbox bridge.
 - `python/agents/`: Individual AI agent implementations.
 - `deploy/`: Dockerfiles and manifests for Cloud Run deployment.
-
-## 🛠️ Global Management
-- **List agents**: `make list-agents`
-- **Lint/Format**: `make lint`
-- **Add Python dependency**: `make add-dep PKG=package_name`
 
 ---
 *For detailed setup of specific agents (e.g. GCP Auth or API endpoints), refer to the READMEs in `python/agents/`.*
