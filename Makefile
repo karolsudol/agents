@@ -1,6 +1,14 @@
 .PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox setup-terraform check-gcloud
 
-# ... (UV section) ...
+UV := $(shell command -v uv 2> /dev/null)
+
+install-uv:
+ifndef UV
+	@echo "Installing uv..."
+	curl -LsSf https://astral.sh/uv/install.sh | sh
+else
+	@echo "uv is already installed."
+endif
 
 setup: install-uv setup-toolbox setup-terraform
 	@echo "Setting up Python environment..."
@@ -8,7 +16,13 @@ setup: install-uv setup-toolbox setup-terraform
 
 # MCP Toolbox binary setup
 setup-toolbox:
-# ... (same as before) ...
+	@if [ ! -f "./toolbox" ]; then \
+		echo "Downloading MCP Toolbox binary..."; \
+		curl -o toolbox https://storage.googleapis.com/genai-toolbox/v0.27.0/linux/amd64/toolbox; \
+		chmod +x toolbox; \
+	else \
+		echo "MCP Toolbox binary already exists."; \
+	fi
 
 # Terraform setup
 TF_VERSION := 1.10.0
