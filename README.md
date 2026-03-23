@@ -44,45 +44,66 @@ The core of this repository is the **Agentic RAG** pattern, which connects an AI
 
 The **MCP Toolbox for Databases** is a standalone server (middleware) that translates your database into a set of tools that an AI can understand.
 
-1.  **It is an MCP Server**: It follows the [Model Context Protocol](https://modelcontextprotocol.io), a standard that allows any AI (like your ADK Agent, Claude Desktop, or a custom UI) to connect to data sources.
-2.  **No-Code Tools**: You define your SQL queries and their parameters in `tools.yaml`. The Toolbox automatically turns these into "Tools" with names and descriptions.
-3.  **The Middleman**: When the Agent needs to find a job, it sends a request to the Toolbox. The Toolbox runs the SQL, handles the connection to Cloud SQL, and returns the results to the Agent.
-4.  **LLM Independent**: While this demo uses Gemini on Vertex AI, the **MCP Toolbox doesn't care which LLM you use**. You can point a Claude or GPT-based agent at the same Toolbox and it will work perfectly.
+1.  **It is an MCP Server**: It follows the [Model Context Protocol](https://modelcontextprotocol.io), a standard that allows any AI to connect to data sources.
+2.  **No-Code Tools**: You define your SQL queries and their parameters in `tools.yaml`.
+3.  **LLM Independent**: The Toolbox doesn't care which LLM you use (Gemini, Claude, GPT, etc.).
 
-## 📂 Project Structure
+---
 
-- `infra/`: Terraform configuration for GCP resources (Cloud SQL, IAM, APIs).
-- `sql/`: SQL scripts for database initialization and seeding.
-- `tools.yaml`: Configuration for the MCP Toolbox (The bridge definitions).
-- `python/agents/`: Individual AI agent implementations.
-  - [**Single Tool Agent**](./python/agents/single_tool_agent/README.md): Simple agent using a time-telling tool.
-  - [**Multi Tool Agent**](./python/agents/multi_tool_agent/): Agent with both time and weather tools.
-  - [**Multimodal Agent**](./python/agents/multimodal_agent/): Audio-analysis agent.
-  - [**Agentic RAG (Cloud SQL)**](./python/agents/agent_toolbox_mcp/README.md): Advanced RAG using MCP Toolbox.
-  - [**Agent Team**](./python/agents/agent_team/README.md): Multi-agent orchestration via FastAPI.
+## 🚀 Getting Started
 
-## 🚀 Quick Start (Root Commands)
+All commands must be run from the **project root directory**.
 
-### 1. Setup
-Install all required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
+### 1. Setup & Environment
+Install required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
 ```bash
 make setup
 ```
+Create a `.env` file in the root based on `.env.example` and set your `GOOGLE_CLOUD_PROJECT`.
 
 ### 2. Infrastructure & Database
 Provision GCP resources and seed the database.
 ```bash
 make infra-init
 make infra-apply
+# Get the password from terraform output and update .env DB_PASSWORD
 make seed-db
 ```
 
-### 3. Run Agents
-- **Agentic RAG**:
-  ```bash
-  make run-toolbox  # Terminal 1: Starts the MCP Server
-  make run-rag      # Terminal 2: Starts the AI Agent
-  ```
+### 3. Choose Your Execution Path
+
+#### Option A: Local Development
+Run the stack on your local machine.
+- **Terminal 1**: `make run-toolbox` (Starts the MCP Server)
+- **Terminal 2**: `make run-rag` (Starts the AI Agent)
+- **Web UI**: `make serve-agents` (Interact with all agents via browser at http://localhost:8000)
+
+#### Option B: Cloud Deployment (Cloud Run)
+Deploy the services to Google Cloud for public access.
+```bash
+make deploy-toolbox
+make deploy-agent
+```
+
+---
+
+## 🧹 Cleanup
+To avoid ongoing costs, delete all GCP resources and clean up local artifacts:
+```bash
+make infra-destroy
+```
+
+## 📂 Project Structure
+- `infra/`: Terraform configuration for GCP resources.
+- `sql/`: SQL scripts for database initialization and seeding.
+- `tools.yaml`: Configuration for the MCP Toolbox bridge.
+- `python/agents/`: Individual AI agent implementations.
+- `deploy/`: Dockerfiles and manifests for Cloud Run deployment.
+
+## 🛠️ Global Management
+- **List agents**: `make list-agents`
+- **Lint/Format**: `make lint`
+- **Add Python dependency**: `make add-dep PKG=package_name`
 
 ---
 *For detailed setup of specific agents (e.g. GCP Auth or API endpoints), refer to the READMEs in `python/agents/`.*
