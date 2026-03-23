@@ -73,7 +73,9 @@ run-toolbox: setup-toolbox
 # Seed Database
 seed-db: check-gcloud setup-sql-proxy
 	@echo "Seeding the database..."
-	@PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent-adk-toolbox-cloudsql/sql/seed.sql
+	@# Source the .env file to get DB_PASSWORD
+	@set -a && . ./.env && set +a; \
+	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent-adk-toolbox-cloudsql/sql/seed.sql
 
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."

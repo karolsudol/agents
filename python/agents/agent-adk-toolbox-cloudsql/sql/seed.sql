@@ -47,5 +47,5 @@ INSERT INTO jobs (title, company, role, tech_stack, salary_range, location, open
   ('Product Engineer', 'GitLab', 'Full Stack', 'Go, React, PostgreSQL, Redis, GCP', '$140-200K/year', 'Remote', 4,
   'Own features end-to-end for an all-in-one DevSecOps platform used by millions of developers. Build Go microservices for CI/CD pipelines, create React frontends for code review and project management, and collaborate with product managers to iterate on user-facing features using data-driven development.');
 
--- Generate initial embeddings
-UPDATE jobs SET description_embedding = embedding('text-embedding-004', description)::vector;
+-- Generate initial embeddings (Temporarily disabled due to Vertex AI connection issues in SQL)
+-- UPDATE jobs SET description_embedding = embedding('text-embedding-004', description)::vector;
