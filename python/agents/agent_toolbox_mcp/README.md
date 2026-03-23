@@ -5,7 +5,7 @@ This agent uses the **MCP Toolbox for Databases** to bridge a Gemini-powered age
 ## Project Structure (Moved to Root)
 
 - `/infra/`: Terraform configuration for GCP resources.
-- `/sql/seed.sql`: SQL script to initialize the database and seed it with jobs.
+- `/sql/cloud_sql_seed.sql`: SQL script to initialize the database and seed it with jobs.
 - `/tools.yaml`: Configuration for the MCP Toolbox.
 - `agent.py`: ADK Agent code.
 

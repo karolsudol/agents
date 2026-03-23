@@ -4,9 +4,9 @@
 
 A collection of AI agents built with the **Agent Development Kit (ADK)**, the **Model Context Protocol (MCP)**, and **Retrieval-Augmented Generation (RAG)**.
 
-## 🏗️ Architecture Overview (Agentic RAG)
+## 🏗️ Architecture Overview
 
-The core of this repository is the **Agentic RAG** pattern, which connects an AI Agent to a database using the **Model Context Protocol (MCP)**.
+This repository demonstrates two ways AI Agents connect to data sources using the **Model Context Protocol (MCP)**.
 
 ```text
                   +--------------------------+
@@ -17,21 +17,22 @@ The core of this repository is the **Agentic RAG** pattern, which connects an AI
                                |
                   +------------v-------------+      +-----------------------+
                   |      ADK AGENT           |      |      ANY LLM          |
-                  | (agent_toolbox_mcp)      <------> (Gemini, Claude, etc) |
-                  +------------+-------------+      +-----------+-----------+
-                               |                                |
-                               | (MCP Protocol)                 |
-                               |                                |
-                  +------------v-------------+                  |
-                  |      MCP TOOLBOX         |                  |
-                  |  (The DB-to-AI Bridge)   |                  |
-                  +------+-----+-------+-----+                  |
-                         |     |       |                        |
-           +-------------+     |       +-------------+----------+
-           |                   |                     |
-+----------v----------+ +------v-------+      +------v-------+
-|    CLOUD SQL        | |  VERTEX AI   |      |  VERTEX AI   |
-|   (PostgreSQL)      | | (Embeddings) |      |   (Gemini)   |
+                  |  (agent_toolbox_mcp)     <------> (Gemini, Claude, etc) |
+                  |  (agent_spanner_mcp)     |      +-----------+-----------+
+                  +------+------------+------+                  |
+                         |            |                         |
+          (MCP Protocol) |            | (Direct MCP Connection) |
+                         |            |                         |
+                  +------v-------+    |                         |
+                  | MCP TOOLBOX  |    |                         |
+                  | (Middleware) |    |                         |
+                  +------+-------+    |                         |
+                         |            |                         |
+           +-------------+            +-------------+-----------+
+           |                                        |
++----------v----------+ +--------------+      +-----v--------+
+|    CLOUD SQL        | |  VERTEX AI   |      |   SPANNER    |
+|   (PostgreSQL)      | | (Embeddings) |      | (Native MCP) |
 +---------------------+ +--------------+      +--------------+
            ^                   ^                     ^
            |                   |                     |
@@ -40,49 +41,84 @@ The core of this repository is the **Agentic RAG** pattern, which connects an AI
                      (GCP Infrastructure)
 ```
 
-## 🧠 What is the MCP Toolbox?
+## 🧠 Why is Spanner different from Cloud SQL?
 
-The **MCP Toolbox for Databases** is a standalone server (middleware) that translates your database into a set of tools that an AI can understand.
+There are two patterns used in this project:
 
-1.  **It is an MCP Server**: It follows the [Model Context Protocol](https://modelcontextprotocol.io), a standard that allows any AI (like your ADK Agent, Claude Desktop, or a custom UI) to connect to data sources.
-2.  **No-Code Tools**: You define your SQL queries and their parameters in `tools.yaml`. The Toolbox automatically turns these into "Tools" with names and descriptions.
-3.  **The Middleman**: When the Agent needs to find a job, it sends a request to the Toolbox. The Toolbox runs the SQL, handles the connection to Cloud SQL, and returns the results to the Agent.
-4.  **LLM Independent**: While this demo uses Gemini on Vertex AI, the **MCP Toolbox doesn't care which LLM you use**. You can point a Claude or GPT-based agent at the same Toolbox and it will work perfectly.
+1.  **Middleware Pattern (Cloud SQL)**: Standard databases like PostgreSQL don't speak MCP. We run the **MCP Toolbox** as a standalone server. It acts as a translator: Agent ↔ MCP Toolbox ↔ Cloud SQL.
+2.  **Native Pattern (Spanner)**: Cloud Spanner has **built-in MCP support**. It provides a native endpoint (`/mcp`) that Google manages for you. The Agent talks directly to the database service without needing any extra middleware or "toolbox" binary.
 
-## 📂 Project Structure
+## 🔍 Understanding Embeddings & Cloud SQL
 
-- `infra/`: Terraform configuration for GCP resources (Cloud SQL, IAM, APIs).
-- `sql/`: SQL scripts for database initialization and seeding.
-- `tools.yaml`: Configuration for the MCP Toolbox (The bridge definitions).
-- `python/agents/`: Individual AI agent implementations.
-  - [**Single Tool Agent**](./python/agents/single_tool_agent/README.md): Simple agent using a time-telling tool.
-  - [**Multi Tool Agent**](./python/agents/multi_tool_agent/): Agent with both time and weather tools.
-  - [**Multimodal Agent**](./python/agents/multimodal_agent/): Audio-analysis agent.
-  - [**Agentic RAG (Cloud SQL)**](./python/agents/agent_toolbox_mcp/README.md): Advanced RAG using MCP Toolbox.
-  - [**Agent Team**](./python/agents/agent_team/README.md): Multi-agent orchestration via FastAPI.
+This project uses **In-Database Embeddings** to power semantic search for job listings in Cloud SQL. We use the **`google_ml_integration`** and **`pgvector`** extensions to store and query 3072-dimensional vectors.
 
-## 🚀 Quick Start (Root Commands)
+## 🏦 Spanner Graph MCP
 
-### 1. Setup
-Install all required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
+The **Spanner Graph Agent** uses Cloud Spanner's **Property Graph** capabilities to perform fraud detection and relationship analysis.
+
+1.  **Property Graphs**: We model financial entities (Accounts, Persons) and their relationships (Owns, Transfers) as a graph.
+2.  **Native MCP**: You connect your agent directly to `https://spanner.googleapis.com/mcp`.
+
+---
+
+## 🚀 Getting Started
+
+All commands must be run from the **project root directory**.
+
+### 1. Setup & Environment
+Install required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
 ```bash
 make setup
 ```
+Create a `.env` file in the root based on `.env.example` and set your `GOOGLE_CLOUD_PROJECT`.
 
 ### 2. Infrastructure & Database
-Provision GCP resources and seed the database.
+Provision GCP resources and seed the databases.
 ```bash
 make infra-init
 make infra-apply
-make seed-db
+# Update .env DB_PASSWORD with the terraform output
+make seed-db       # Seed Cloud SQL
+make seed-spanner  # Seed Spanner Graph
 ```
 
-### 3. Run Agents
-- **Agentic RAG**:
-  ```bash
-  make run-toolbox  # Terminal 1: Starts the MCP Server
-  make run-rag      # Terminal 2: Starts the AI Agent
-  ```
+### 3. Choose Your Execution Path
+
+#### Option A: Local Development
+Run the stack on your local machine.
+- **Agentic RAG (Cloud SQL)**:
+  - Terminal 1: `make run-toolbox` (Middleware)
+  - Terminal 2: `make run-rag` (Agent)
+- **Spanner Graph Agent**:
+  - Terminal 1: `make run-spanner` (Direct to Spanner)
+- **Web UI**: `make serve-agents` (Interact with all agents at http://localhost:8000)
+
+#### Option B: Cloud Deployment (Cloud Run)
+Deploy the Cloud SQL stack to Google Cloud.
+```bash
+make deploy-toolbox
+make deploy-agent
+```
+
+---
+
+## 💰 Cost Management
+Cloud SQL and Spanner can be expensive. You can "pause" the Cloud SQL instance when not in use:
+- **Pause Instance**: `make infra-stop`
+- **Resume Instance**: `make infra-start`
+
+## 🧹 Cleanup
+To delete all GCP resources (Cloud SQL, Spanner, etc.) and clean up local artifacts:
+```bash
+make infra-destroy
+```
+
+## 📂 Project Structure
+- `infra/`: Terraform configuration for GCP resources.
+- `sql/`: SQL scripts for database initialization and seeding (`cloud_sql_seed.sql`, `spanner_seed.sql`).
+- `tools.yaml`: Configuration for the MCP Toolbox bridge (Cloud SQL only).
+- `python/agents/`: Individual AI agent implementations.
+- `deploy/`: Dockerfiles and manifests for Cloud Run deployment.
 
 ---
 *For detailed setup of specific agents (e.g. GCP Auth or API endpoints), refer to the READMEs in `python/agents/`.*

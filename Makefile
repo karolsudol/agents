@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy
+.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -65,6 +65,53 @@ infra-apply: setup-terraform
 	@echo "Applying Terraform configuration..."
 	./terraform -chdir=infra apply
 
+infra-stop: check-gcloud
+	@echo "Stopping Cloud SQL instance to save on instance costs..."
+	@set -a && . ./.env && set +a; \
+	gcloud sql instances patch jobs-db-instance --activation-policy=NEVER --project=$$GOOGLE_CLOUD_PROJECT --quiet
+	@echo "NOTE: Cloud Spanner does not support stopping. Scale it down to 100 processing units if you wish to minimize costs."
+
+infra-start: check-gcloud
+	@echo "Starting Cloud SQL instance..."
+	@set -a && . ./.env && set +a; \
+	gcloud sql instances patch jobs-db-instance --activation-policy=ALWAYS --project=$$GOOGLE_CLOUD_PROJECT --quiet
+
+infra-destroy: check-gcloud setup-terraform
+	@echo "Destroying all infrastructure (Cloud SQL, Spanner, etc.)..."
+	./terraform -chdir=infra destroy -auto-approve
+	@echo "Deleting Cloud Run services..."
+	@set -a && . ./.env && set +a; \
+	gcloud run services delete mcp-toolbox-service --region=$$REGION --project=$$GOOGLE_CLOUD_PROJECT --quiet 2>/dev/null || true; \
+	gcloud run services delete adk-agents-service --region=$$REGION --project=$$GOOGLE_CLOUD_PROJECT --quiet 2>/dev/null || true; \
+	echo "Cleaning up extra Cloud Run artifacts..."
+	@set -a && . ./.env && set +a; \
+	gcloud artifacts repositories delete cloud-run-source-deploy --location=$$REGION --quiet 2>/dev/null || true
+
+# Deployment to Cloud Run (Source-based build)
+deploy-toolbox: check-gcloud
+	@echo "Deploying MCP Toolbox to Cloud Run..."
+	@set -a && . ./.env && set +a; \
+	cp toolbox tools.yaml deploy/toolbox/; \
+	gcloud run deploy mcp-toolbox-service \
+		--source deploy/toolbox/ \
+		--region $$REGION \
+		--project $$GOOGLE_CLOUD_PROJECT \
+		--set-env-vars DB_PASSWORD=$$DB_PASSWORD,GOOGLE_CLOUD_PROJECT=$$GOOGLE_CLOUD_PROJECT,REGION=$$REGION \
+		--allow-unauthenticated
+
+deploy-agent: check-gcloud
+	@echo "Deploying ADK Agents to Cloud Run..."
+	@set -a && . ./.env && set +a; \
+	cp python/pyproject.toml python/uv.lock deploy/agent/; \
+	cp -r python/agents deploy/agent/; \
+	TOOLBOX_URL=$$(gcloud run services describe mcp-toolbox-service --region $$REGION --format 'value(status.url)'); \
+	gcloud run deploy adk-agents-service \
+		--source deploy/agent/ \
+		--region $$REGION \
+		--project $$GOOGLE_CLOUD_PROJECT \
+		--set-env-vars TOOLBOX_URL=$$TOOLBOX_URL,GOOGLE_CLOUD_PROJECT=$$GOOGLE_CLOUD_PROJECT,REGION=$$REGION \
+		--allow-unauthenticated
+
 # Run MCP Toolbox
 run-toolbox: setup-toolbox
 	@echo "Running MCP Toolbox..."
@@ -76,7 +123,13 @@ seed-db: check-gcloud setup-sql-proxy
 	@echo "Seeding the database..."
 	@# Source the .env file to get DB_PASSWORD
 	@set -a && . ./.env && set +a; \
-	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < sql/seed.sql
+	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < sql/cloud_sql_seed.sql
+
+# Seed Spanner
+seed-spanner: check-gcloud
+	@echo "Seeding Spanner database..."
+	@set -a && . ./.env && set +a; \
+	gcloud spanner databases execute-sql finance-db --instance=finance-instance --project=$$GOOGLE_CLOUD_PROJECT --sql="$$(cat sql/spanner_seed.sql)"
 
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."
@@ -122,6 +175,9 @@ run-multimodal:
 
 run-rag:
 	@$(MAKE) run-agent NAME=agent_toolbox_mcp
+
+run-spanner:
+	@$(MAKE) run-agent NAME=agent_spanner_mcp
 
 run-team-api:
 	@echo "Starting the Agent Team FastAPI server..."

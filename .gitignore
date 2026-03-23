@@ -221,6 +221,9 @@ cloud-sql-proxy
 # Binaries
 LICENSE.txt
 
+# Deployment
+deploy/
+
 # Marimo
 marimo/_static/
 marimo/_lsp/
