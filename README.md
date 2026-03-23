@@ -1,7 +1,7 @@
 # agents
 ![Agent Development Kit](agent-development-kit.png)
 
-Sample agents demo: A2A + ADK + MCP + RAG + Clean multi-lang structure.
+Sample agents: A2A + ADK + MCP + RAG
 
 ## Setup
 1.  **Environment Setup**:
