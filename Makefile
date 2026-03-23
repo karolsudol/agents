@@ -69,6 +69,7 @@ infra-stop: check-gcloud
 	@echo "Stopping Cloud SQL instance to save on instance costs..."
 	@set -a && . ./.env && set +a; \
 	gcloud sql instances patch jobs-db-instance --activation-policy=NEVER --project=$$GOOGLE_CLOUD_PROJECT --quiet
+	@echo "NOTE: Cloud Spanner does not support stopping. Scale it down to 100 processing units if you wish to minimize costs."
 
 infra-start: check-gcloud
 	@echo "Starting Cloud SQL instance..."
@@ -76,9 +77,13 @@ infra-start: check-gcloud
 	gcloud sql instances patch jobs-db-instance --activation-policy=ALWAYS --project=$$GOOGLE_CLOUD_PROJECT --quiet
 
 infra-destroy: check-gcloud setup-terraform
-	@echo "Destroying infrastructure..."
+	@echo "Destroying all infrastructure (Cloud SQL, Spanner, etc.)..."
 	./terraform -chdir=infra destroy -auto-approve
-	@echo "Cleaning up extra Cloud Run artifacts..."
+	@echo "Deleting Cloud Run services..."
+	@set -a && . ./.env && set +a; \
+	gcloud run services delete mcp-toolbox-service --region=$$REGION --project=$$GOOGLE_CLOUD_PROJECT --quiet 2>/dev/null || true; \
+	gcloud run services delete adk-agents-service --region=$$REGION --project=$$GOOGLE_CLOUD_PROJECT --quiet 2>/dev/null || true; \
+	echo "Cleaning up extra Cloud Run artifacts..."
 	@set -a && . ./.env && set +a; \
 	gcloud artifacts repositories delete cloud-run-source-deploy --location=$$REGION --quiet 2>/dev/null || true
 
