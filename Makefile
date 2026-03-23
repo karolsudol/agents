@@ -171,6 +171,9 @@ run-multimodal:
 run-rag:
 	@$(MAKE) run-agent NAME=agent_toolbox_mcp
 
+run-spanner:
+	@$(MAKE) run-agent NAME=agent_spanner_mcp
+
 run-team-api:
 	@echo "Starting the Agent Team FastAPI server..."
 	cd python && uv run uvicorn agents.agent_team.main:app --host 0.0.0.0 --port 8000 --reload
