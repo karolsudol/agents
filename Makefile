@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox setup-terraform check-gcloud
+.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -10,7 +10,7 @@ else
 	@echo "uv is already installed."
 endif
 
-setup: install-uv setup-toolbox setup-terraform
+setup: install-uv setup-toolbox setup-terraform setup-sql-proxy
 	@echo "Setting up Python environment..."
 	cd python && uv sync
 
@@ -37,6 +37,16 @@ setup-terraform:
 		echo "Terraform binary already exists."; \
 	fi
 
+# Cloud SQL Proxy setup
+setup-sql-proxy:
+	@if ! command -v cloud-sql-proxy >/dev/null 2>&1 && [ ! -f "./cloud-sql-proxy" ]; then \
+		echo "Downloading Cloud SQL Auth Proxy..."; \
+		curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.2/cloud-sql-proxy.linux.amd64; \
+		chmod +x cloud-sql-proxy; \
+	else \
+		echo "Cloud SQL Auth Proxy already exists."; \
+	fi
+
 # Check for gcloud
 check-gcloud:
 	@if command -v gcloud >/dev/null 2>&1; then \
@@ -61,9 +71,9 @@ run-toolbox: setup-toolbox
 	./toolbox run --config python/agents/agent-adk-toolbox-cloudsql/tools.yaml
 
 # Seed Database
-seed-db: check-gcloud
+seed-db: check-gcloud setup-sql-proxy
 	@echo "Seeding the database..."
-	gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent-adk-toolbox-cloudsql/sql/seed.sql
+	@PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent-adk-toolbox-cloudsql/sql/seed.sql
 
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."

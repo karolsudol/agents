@@ -12,7 +12,10 @@ This agent uses the **MCP Toolbox for Databases** to bridge a Gemini-powered age
 ## Prerequisites
 
 1.  **GCP Project**: A Google Cloud Project with billing enabled.
-2.  **gcloud CLI**: Installed and authenticated (`gcloud auth application-default login`).
+2.  **gcloud CLI**: Installed and authenticated.
+    - **Install**: `curl -sSL https://sdk.cloud.google.com | bash`
+    - **Init**: `gcloud init`
+    - **Authenticate**: `gcloud auth application-default login`
 3.  **Environment Variables**: A root `.env` file (see below).
 
 ## Setup Instructions
