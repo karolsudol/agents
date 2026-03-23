@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, Dict, Union
 from google.adk.tools.tool_context import ToolContext
 
 
@@ -18,14 +18,13 @@ def say_goodbye() -> str:
     return "Goodbye! Have a great day."
 
 
-def get_weather(city: str, tool_context: ToolContext) -> dict[str, str | None]:
+def get_weather(city: str, tool_context: ToolContext) -> Dict[str, Union[str, None]]:
     """Retrieves the current weather report for a specified city.
 
     Args:
         city (str): The name of the city (e.g., "New York", "London", "Tokyo").
     """
     # Key Concept: Reading from Session State
-    # We can check the user's preferred unit (e.g., 'Celsius' or 'Fahrenheit')
     preferred_unit = tool_context.state.get(
         "user_preference_temperature_unit", "Celsius"
     )
@@ -55,10 +54,16 @@ def get_weather(city: str, tool_context: ToolContext) -> dict[str, str | None]:
         # Key Concept: Writing back to state
         tool_context.state["last_city_checked"] = city
 
-        return {"status": "success", "report": report, "error_message": None}
+        success_res: Dict[str, Union[str, None]] = {
+            "status": "success",
+            "report": report,
+            "error_message": None,
+        }
+        return success_res
 
-    return {
+    error_res: Dict[str, Union[str, None]] = {
         "status": "error",
         "report": None,
         "error_message": f"Sorry, I don't have weather for '{city}'.",
     }
+    return error_res
