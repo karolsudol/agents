@@ -8,7 +8,7 @@ This directory contains Python-based AI agent samples developed using the **Agen
   - [**Single Tool Agent**](./agents/single_tool_agent/README.md): Simple agent using a time-telling tool.
   - [**Multi Tool Agent**](./agents/multi_tool_agent/): Agent with both time and weather tools.
   - [**Multimodal Agent**](./agents/multimodal_agent/): Multimodal agent with an audio-analysis tool.
-  - [**Agentic RAG (Cloud SQL)**](./agents/agent-adk-toolbox-cloudsql/README.md): Advanced RAG agent using MCP Toolbox and Cloud SQL.
+  - [**Agentic RAG (Cloud SQL)**](./agents/agent_adk_toolbox_cloudsql/README.md): Advanced RAG agent using MCP Toolbox and Cloud SQL.
   - [**Agent Team**](./agents/agent_team/README.md): Multi-agent orchestration with a FastAPI server.
 - `notebooks/`: Jupyter/Colab notebooks for experimentation.
 

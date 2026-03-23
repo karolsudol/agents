@@ -7,9 +7,11 @@ from google.adk.tools.toolbox_toolset import ToolboxToolset
 TOOLBOX_URL = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
 toolbox = ToolboxToolset(TOOLBOX_URL)
 
+MODEL_GEMINI_2_5_FLASH = "gemini-2.5-flash"
+
 root_agent = Agent(
     name="jobs_agent",
-    model="gemini-1.5-flash",  # Or gemini-2.0-flash
+    model=MODEL_GEMINI_2_5_FLASH,
     description="A helpful assistant at 'TechJobs', a tech job listing platform.",
     instruction="""You are a helpful assistant at "TechJobs," a tech job listing platform.
 Your job:

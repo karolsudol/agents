@@ -59,23 +59,24 @@ check-gcloud:
 # Infrastructure
 infra-init: setup-terraform
 	@echo "Initializing Terraform..."
-	./terraform -chdir=python/agents/agent-adk-toolbox-cloudsql/infra init
+	./terraform -chdir=python/agents/agent_adk_toolbox_cloudsql/infra init
 
 infra-apply: setup-terraform
 	@echo "Applying Terraform configuration..."
-	./terraform -chdir=python/agents/agent-adk-toolbox-cloudsql/infra apply
+	./terraform -chdir=python/agents/agent_adk_toolbox_cloudsql/infra apply
 
 # Run MCP Toolbox
 run-toolbox: setup-toolbox
 	@echo "Running MCP Toolbox..."
-	./toolbox run --config python/agents/agent-adk-toolbox-cloudsql/tools.yaml
+	@set -a && . ./.env && set +a; \
+	./toolbox --tools-file python/agents/agent_adk_toolbox_cloudsql/tools.yaml
 
 # Seed Database
 seed-db: check-gcloud setup-sql-proxy
 	@echo "Seeding the database..."
 	@# Source the .env file to get DB_PASSWORD
 	@set -a && . ./.env && set +a; \
-	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent-adk-toolbox-cloudsql/sql/seed.sql
+	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent_adk_toolbox_cloudsql/sql/seed.sql
 
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."
@@ -120,7 +121,7 @@ run-multimodal:
 	@$(MAKE) run-agent NAME=multimodal_agent
 
 run-rag:
-	@$(MAKE) run-agent NAME=agent-adk-toolbox-cloudsql
+	@$(MAKE) run-agent NAME=agent_adk_toolbox_cloudsql
 
 run-team-api:
 	@echo "Starting the Agent Team FastAPI server..."
