@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal serve-agents list-agents run-agent add-dep
+.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -10,9 +10,73 @@ else
 	@echo "uv is already installed."
 endif
 
-setup: install-uv
+setup: install-uv setup-toolbox setup-terraform setup-sql-proxy
 	@echo "Setting up Python environment..."
 	cd python && uv sync
+
+# MCP Toolbox binary setup
+setup-toolbox:
+	@if [ ! -f "./toolbox" ]; then \
+		echo "Downloading MCP Toolbox binary..."; \
+		curl -o toolbox https://storage.googleapis.com/genai-toolbox/v0.27.0/linux/amd64/toolbox; \
+		chmod +x toolbox; \
+	else \
+		echo "MCP Toolbox binary already exists."; \
+	fi
+
+# Terraform setup
+TF_VERSION := 1.10.0
+setup-terraform:
+	@if [ ! -f "./terraform" ]; then \
+		echo "Downloading Terraform v$(TF_VERSION)..."; \
+		curl -o terraform.zip https://releases.hashicorp.com/terraform/$(TF_VERSION)/terraform_$(TF_VERSION)_linux_amd64.zip; \
+		unzip -o terraform.zip; \
+		rm terraform.zip; \
+		chmod +x terraform; \
+	else \
+		echo "Terraform binary already exists."; \
+	fi
+
+# Cloud SQL Proxy setup
+setup-sql-proxy:
+	@if ! command -v cloud-sql-proxy >/dev/null 2>&1 && [ ! -f "./cloud-sql-proxy" ]; then \
+		echo "Downloading Cloud SQL Auth Proxy..."; \
+		curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.14.2/cloud-sql-proxy.linux.amd64; \
+		chmod +x cloud-sql-proxy; \
+	else \
+		echo "Cloud SQL Auth Proxy already exists."; \
+	fi
+
+# Check for gcloud
+check-gcloud:
+	@if command -v gcloud >/dev/null 2>&1; then \
+		echo "gcloud is installed: $$(gcloud --version | head -n 1)"; \
+	else \
+		echo "ERROR: gcloud CLI is not installed. Please install it from: https://cloud.google.com/sdk/docs/install"; \
+		exit 1; \
+	fi
+
+# Infrastructure
+infra-init: setup-terraform
+	@echo "Initializing Terraform..."
+	./terraform -chdir=infra init
+
+infra-apply: setup-terraform
+	@echo "Applying Terraform configuration..."
+	./terraform -chdir=infra apply
+
+# Run MCP Toolbox
+run-toolbox: setup-toolbox
+	@echo "Running MCP Toolbox..."
+	@set -a && . ./.env && set +a; \
+	./toolbox --tools-file tools.yaml
+
+# Seed Database
+seed-db: check-gcloud setup-sql-proxy
+	@echo "Seeding the database..."
+	@# Source the .env file to get DB_PASSWORD
+	@set -a && . ./.env && set +a; \
+	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < sql/seed.sql
 
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."
@@ -55,6 +119,9 @@ run-multi:
 
 run-multimodal:
 	@$(MAKE) run-agent NAME=multimodal_agent
+
+run-rag:
+	@$(MAKE) run-agent NAME=agent_toolbox_mcp
 
 run-team-api:
 	@echo "Starting the Agent Team FastAPI server..."
