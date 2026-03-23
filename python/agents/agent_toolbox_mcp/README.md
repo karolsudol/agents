@@ -2,11 +2,11 @@
 
 This agent uses the **MCP Toolbox for Databases** to bridge a Gemini-powered agent with **Cloud SQL (PostgreSQL)**.
 
-## Project Structure
+## Project Structure (Moved to Root)
 
-- `infra/`: Terraform configuration for GCP resources.
-- `sql/seed.sql`: SQL script to initialize the database and seed it with jobs.
-- `tools.yaml`: Configuration for the MCP Toolbox.
+- `/infra/`: Terraform configuration for GCP resources.
+- `/sql/seed.sql`: SQL script to initialize the database and seed it with jobs.
+- `/tools.yaml`: Configuration for the MCP Toolbox.
 - `agent.py`: ADK Agent code.
 
 ## Prerequisites
@@ -23,7 +23,7 @@ This agent uses the **MCP Toolbox for Databases** to bridge a Gemini-powered age
 All commands MUST be run from the **project root directory**.
 
 ### 1. Initialize Environment
-This will download the necessary binaries (`terraform`, `toolbox`) and sync Python dependencies.
+This will download the necessary binaries (`terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
 
 ```bash
 make setup
@@ -50,7 +50,7 @@ make infra-apply
 After the infrastructure is applied, retrieve your generated database password and add it to your `.env`:
 
 ```bash
-./terraform -chdir=python/agents/agent-adk-toolbox-cloudsql/infra output -raw db_password
+./terraform -chdir=infra output -raw db_password
 ```
 
 ### 4. Seed the Database
