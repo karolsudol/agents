@@ -56,6 +56,10 @@ run-multi:
 run-multimodal:
 	@$(MAKE) run-agent NAME=multimodal_agent
 
+run-team-api:
+	@echo "Starting the Agent Team FastAPI server..."
+	cd python && uv run uvicorn agents.agent_team.main:app --host 0.0.0.0 --port 8000 --reload
+
 serve-agents:
 	@echo "Serving the agents web interface on port 8000..."
 	cd python && uv run --env-file ../.env adk web agents --port 8000
