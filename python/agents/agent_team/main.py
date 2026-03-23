@@ -1,72 +1,67 @@
-from typing import Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from google.genai import types
 
-# Import our agent team components
-from .services import get_runner, initialize_session, session_service
+# Import our modular components
+from .services import session_service, create_request_runner, APP_NAME
 
-# Load environment variables (API Key)
+# Load API Key
 load_dotenv()
 
 app = FastAPI(title="Agent Team API")
 
 
-# Request Model
+@app.get("/")
+async def root():
+    return {"status": "alive", "message": "Agent Team API is running."}
+
+
 class ChatRequest(BaseModel):
     user_id: str
     session_id: str
     message: str
-    temp_unit: Optional[str] = "Celsius"
+    temp_unit: str = "Celsius"
 
 
 @app.post("/chat")
-async def chat(request: ChatRequest) -> dict[str, str]:
-    """Sends a message to the agent team and returns the final response."""
-    app_name = "agent_team_app"
+async def chat(request: ChatRequest):
+    """Sends a message to the agent team using a fresh runner per request."""
 
-    # 1. Ensure the session exists
-    session = await session_service.get_session(
-        app_name=app_name, user_id=request.user_id, session_id=request.session_id
-    )
-
-    if not session:
-        print(f"--- Session {request.session_id} not found. Initializing... ---")
-        await initialize_session(
+    # 1. MANDATORY: Create/Get session in the same scope as the runner
+    try:
+        await session_service.create_session(
+            app_name=APP_NAME,
             user_id=request.user_id,
             session_id=request.session_id,
-            initial_state={"user_preference_temperature_unit": request.temp_unit},
+            state={"user_preference_temperature_unit": request.temp_unit},
         )
-    else:
-        print(f"--- Using existing session {request.session_id} ---")
+        print(f"--- [API] Session {request.session_id} created ---")
+    except Exception:
+        # Session already exists, which is expected on subsequent calls
+        pass
 
-    # 2. Get the runner and prepare the message
-    runner = get_runner()
+    # 2. Create a fresh runner for this request
+    runner = create_request_runner()
+
     content = types.Content(role="user", parts=[types.Part(text=request.message)])
+    final_response = "No response from agent."
 
-    final_response = "Agent did not produce a final response."
-
-    # 3. Run the agent team and wait for events
+    # 3. Execute the run
     try:
         async for event in runner.run_async(
             user_id=request.user_id, session_id=request.session_id, new_message=content
         ):
-            # We look for the final response from the agent
             if event.is_final_response():
                 if event.content and event.content.parts:
-                    final_response = (
-                        event.content.parts[0].text
-                        or "Agent produced an empty response."
-                    )
-                elif event.actions and event.actions.escalate:
-                    final_response = f"Agent escalated: {event.error_message or 'No error message provided.'}"
+                    final_response = event.content.parts[0].text or "Empty response."
                 break
 
         return {"response": final_response}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"--- [API] Runner Error: {e} ---")
+        raise HTTPException(status_code=500, detail=f"Agent Error: {str(e)}")
 
 
 if __name__ == "__main__":
