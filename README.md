@@ -87,6 +87,11 @@ make deploy-agent
 
 ---
 
+## 💰 Cost Management
+Cloud SQL can be expensive if left running. You can "pause" the instance when not in use:
+- **Pause Instance**: `make infra-stop` (Saves CPU/Memory costs; storage still billed)
+- **Resume Instance**: `make infra-start`
+
 ## 🧹 Cleanup
 To avoid ongoing costs, delete all GCP resources and clean up local artifacts:
 ```bash

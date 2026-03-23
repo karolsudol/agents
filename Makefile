@@ -65,6 +65,16 @@ infra-apply: setup-terraform
 	@echo "Applying Terraform configuration..."
 	./terraform -chdir=infra apply
 
+infra-stop: check-gcloud
+	@echo "Stopping Cloud SQL instance to save on instance costs..."
+	@set -a && . ./.env && set +a; \
+	gcloud sql instances patch jobs-db-instance --activation-policy=NEVER --project=$$GOOGLE_CLOUD_PROJECT --quiet
+
+infra-start: check-gcloud
+	@echo "Starting Cloud SQL instance..."
+	@set -a && . ./.env && set +a; \
+	gcloud sql instances patch jobs-db-instance --activation-policy=ALWAYS --project=$$GOOGLE_CLOUD_PROJECT --quiet
+
 infra-destroy: check-gcloud setup-terraform
 	@echo "Destroying infrastructure..."
 	./terraform -chdir=infra destroy -auto-approve
