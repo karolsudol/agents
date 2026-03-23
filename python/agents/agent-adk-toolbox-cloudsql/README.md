@@ -11,49 +11,61 @@ This agent uses the **MCP Toolbox for Databases** to bridge a Gemini-powered age
 
 ## Prerequisites
 
-1.  GCP Project: `skillful-signer-491109-r0`
-2.  Terraform installed.
-3.  `gcloud` CLI installed and authenticated.
-4.  Root `.env` file configured with `GOOGLE_CLOUD_PROJECT`, `REGION`, and `DB_PASSWORD`.
+1.  **GCP Project**: A Google Cloud Project with billing enabled.
+2.  **gcloud CLI**: Installed and authenticated (`gcloud auth application-default login`).
+3.  **Environment Variables**: A root `.env` file (see below).
 
 ## Setup Instructions
 
-All commands should be run from the **project root directory**.
+All commands MUST be run from the **project root directory**.
 
-### 1. Provision Infrastructure
+### 1. Initialize Environment
+This will download the necessary binaries (`terraform`, `toolbox`) and sync Python dependencies.
+
+```bash
+make setup
+```
+
+### 2. Configure Environment Variables
+Create or update your root `.env` file with your project details:
+
+```text
+GOOGLE_CLOUD_PROJECT="<YOUR_PROJECT_ID>"
+REGION="europe-west1"
+DB_PASSWORD=""
+TOOLBOX_URL="http://127.0.0.1:5000"
+```
+
+### 3. Provision Infrastructure
+Deploy Cloud SQL, enable APIs, and set up IAM permissions.
 
 ```bash
 make infra-init
 make infra-apply
 ```
 
-After the infrastructure is applied, retrieve your database password:
+After the infrastructure is applied, retrieve your generated database password and add it to your `.env`:
 
 ```bash
-cd python/agents/agent-adk-toolbox-cloudsql/infra && terraform output -raw db_password
+./terraform -chdir=python/agents/agent-adk-toolbox-cloudsql/infra output -raw db_password
 ```
 
-Add this password to your root `.env` as `DB_PASSWORD`.
-
-### 2. Seed the Database
-
-Once the Cloud SQL instance is ready, seed it with the sample jobs data:
+### 4. Seed the Database
+Populate the Cloud SQL instance with sample job listings and generate vector embeddings.
 
 ```bash
 make seed-db
 ```
 
-### 3. Run the MCP Toolbox
-
-The MCP Toolbox acts as the bridge between your agent and the database:
+### 5. Run the MCP Toolbox
+The toolbox acts as the bridge between your agent and the database. Keep this running in a separate terminal.
 
 ```bash
 make run-toolbox
 ```
 
-### 4. Run the Agent
-
-In a new terminal (with the toolbox still running):
+### 6. Run the Agent
+In a new terminal window, run the ADK Agent:
 
 ```bash
 make run-rag

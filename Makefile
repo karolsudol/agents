@@ -1,45 +1,53 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox
+.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox setup-terraform check-gcloud
 
-UV := $(shell command -v uv 2> /dev/null)
+# ... (UV section) ...
 
-install-uv:
-ifndef UV
-	@echo "Installing uv..."
-	curl -LsSf https://astral.sh/uv/install.sh | sh
-else
-	@echo "uv is already installed."
-endif
-
-setup: install-uv setup-toolbox
+setup: install-uv setup-toolbox setup-terraform
 	@echo "Setting up Python environment..."
 	cd python && uv sync
 
 # MCP Toolbox binary setup
 setup-toolbox:
-	@if [ ! -f "./toolbox" ]; then \
-		echo "Downloading MCP Toolbox binary..."; \
-		curl -o toolbox https://storage.googleapis.com/genai-toolbox/v0.27.0/linux/amd64/toolbox; \
-		chmod +x toolbox; \
+# ... (same as before) ...
+
+# Terraform setup
+TF_VERSION := 1.10.0
+setup-terraform:
+	@if [ ! -f "./terraform" ]; then \
+		echo "Downloading Terraform v$(TF_VERSION)..."; \
+		curl -o terraform.zip https://releases.hashicorp.com/terraform/$(TF_VERSION)/terraform_$(TF_VERSION)_linux_amd64.zip; \
+		unzip -o terraform.zip; \
+		rm terraform.zip; \
+		chmod +x terraform; \
 	else \
-		echo "MCP Toolbox binary already exists."; \
+		echo "Terraform binary already exists."; \
+	fi
+
+# Check for gcloud
+check-gcloud:
+	@if command -v gcloud >/dev/null 2>&1; then \
+		echo "gcloud is installed: $$(gcloud --version | head -n 1)"; \
+	else \
+		echo "ERROR: gcloud CLI is not installed. Please install it from: https://cloud.google.com/sdk/docs/install"; \
+		exit 1; \
 	fi
 
 # Infrastructure
-infra-init:
+infra-init: setup-terraform
 	@echo "Initializing Terraform..."
-	cd python/agents/agent-adk-toolbox-cloudsql/infra && terraform init
+	./terraform -chdir=python/agents/agent-adk-toolbox-cloudsql/infra init
 
-infra-apply:
+infra-apply: setup-terraform
 	@echo "Applying Terraform configuration..."
-	cd python/agents/agent-adk-toolbox-cloudsql/infra && terraform apply
+	./terraform -chdir=python/agents/agent-adk-toolbox-cloudsql/infra apply
 
 # Run MCP Toolbox
-run-toolbox:
+run-toolbox: setup-toolbox
 	@echo "Running MCP Toolbox..."
 	./toolbox run --config python/agents/agent-adk-toolbox-cloudsql/tools.yaml
 
 # Seed Database
-seed-db:
+seed-db: check-gcloud
 	@echo "Seeding the database..."
 	gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent-adk-toolbox-cloudsql/sql/seed.sql
 
