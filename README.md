@@ -116,7 +116,7 @@ make infra-destroy
 
 ## 📂 Project Structure
 - `infra/`: Terraform configuration for GCP resources.
-- `sql/`: SQL scripts for database initialization and seeding.
+- `sql/`: SQL scripts for database initialization and seeding (`cloud_sql_seed.sql`, `spanner_seed.sql`).
 - `tools.yaml`: Configuration for the MCP Toolbox bridge.
 - `python/agents/`: Individual AI agent implementations.
 - `deploy/`: Dockerfiles and manifests for Cloud Run deployment.

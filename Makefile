@@ -118,7 +118,7 @@ seed-db: check-gcloud setup-sql-proxy
 	@echo "Seeding the database..."
 	@# Source the .env file to get DB_PASSWORD
 	@set -a && . ./.env && set +a; \
-	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < sql/seed.sql
+	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < sql/cloud_sql_seed.sql
 
 # Seed Spanner
 seed-spanner: check-gcloud
