@@ -20,6 +20,7 @@ Sample agents: A2A + ADK + MCP + RAG
 - **Run Single Tool Agent**: `make run-single`
 - **Run Multi Tool Agent**: `make run-multi`
 - **Run Multimodal Agent**: `make run-multimodal`
+- **Run Agentic RAG Agent**: `make run-rag` (Requires Cloud SQL and MCP Toolbox)
 - **Serve Web UI**: `make serve-agents`
 - **Add a Python dependency**: `make add-dep PKG=requests`
 
@@ -36,5 +37,6 @@ make shell
   - `single_tool_agent`: Simple agent using a time-telling tool.
   - `multi_tool_agent`: Agent with both time and weather tools.
   - `multimodal_agent`: Multimodal agent with an audio-analysis tool.
+  - `agent-adk-toolbox-cloudsql`: Agentic RAG agent using MCP Toolbox and Cloud SQL.
 - `python/notebooks`: Colab notebooks.
 - `go/agents`: Go-based AI agents.

@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal serve-agents list-agents run-agent add-dep
+.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply setup-toolbox run-toolbox
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -10,9 +10,38 @@ else
 	@echo "uv is already installed."
 endif
 
-setup: install-uv
+setup: install-uv setup-toolbox
 	@echo "Setting up Python environment..."
 	cd python && uv sync
+
+# MCP Toolbox binary setup
+setup-toolbox:
+	@if [ ! -f "./toolbox" ]; then \
+		echo "Downloading MCP Toolbox binary..."; \
+		curl -o toolbox https://storage.googleapis.com/genai-toolbox/v0.27.0/linux/amd64/toolbox; \
+		chmod +x toolbox; \
+	else \
+		echo "MCP Toolbox binary already exists."; \
+	fi
+
+# Infrastructure
+infra-init:
+	@echo "Initializing Terraform..."
+	cd python/agents/agent-adk-toolbox-cloudsql/infra && terraform init
+
+infra-apply:
+	@echo "Applying Terraform configuration..."
+	cd python/agents/agent-adk-toolbox-cloudsql/infra && terraform apply
+
+# Run MCP Toolbox
+run-toolbox:
+	@echo "Running MCP Toolbox..."
+	./toolbox run --config python/agents/agent-adk-toolbox-cloudsql/tools.yaml
+
+# Seed Database
+seed-db:
+	@echo "Seeding the database..."
+	gcloud sql connect jobs-db-instance --user=jobs_user --project=skillful-signer-491109-r0 --quiet < python/agents/agent-adk-toolbox-cloudsql/sql/seed.sql
 
 install-precommit: setup
 	@echo "Installing pre-commit hooks..."
@@ -55,6 +84,9 @@ run-multi:
 
 run-multimodal:
 	@$(MAKE) run-agent NAME=multimodal_agent
+
+run-rag:
+	@$(MAKE) run-agent NAME=agent-adk-toolbox-cloudsql
 
 run-team-api:
 	@echo "Starting the Agent Team FastAPI server..."
