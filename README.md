@@ -1,50 +1,48 @@
 # AI Agents Collection
 
-![Agent Development Kit](agent-development-kit.png)
+<img src="adk.png" width="200" alt="Agent Development Kit">
 
 A collection of AI agents built with the **Agent Development Kit (ADK)**, the **Model Context Protocol (MCP)**, and **Retrieval-Augmented Generation (RAG)**.
 
 ## 🏗️ Architecture Overview
 
-This repository demonstrates three ways AI Agents connect to data sources and collaborate using the **Model Context Protocol (MCP)** and **Agent-to-Agent (A2A)** orchestration.
+This repository demonstrates how specialized AI Agents connect to diverse data sources and collaborate via **Agent-to-Agent (A2A)** orchestration.
 
 ```text
-                  +--------------------------+
-                  |          USER            |
-                  +------------+-------------+
-                               |
-                               | (Natural Language)
-                               |
-                  +------------v-------------+      +-----------------------+
-                  |    TEAM ORCHESTRATOR     |      |      ANY LLM          |
-                  |     (Super Agent)        <------> (Gemini, Claude, etc) |
-                  +------------+-------------+      +-----------+-----------+
-                               |
-                +--------------+--------------+
-                |              |              |
-         (A2A)  |       (A2A)  |       (A2A)  |       (A2A)
-         +---------v-----+  +-----v-------+  +---v-----------+  +---v-----------+
-         |  JOBS AGENT   |  | SPANNER AGT |  | CURRENCY AGT  |  | WEATHER AGT   |
-         +---------+-----+  +-----+-------+  +---+-----------+  +---+-----------+
-                |              |              |                  |
-                |              |              |                  |
-         +------v-------+      |       +------v-------+          |
-         | MCP TOOLBOX  |      |       |  CUSTOM MCP  |          |
-         | (Middleware) |      |       |   (Server)   |          |
-         +------+-------+      |       +--------------+          |
-
-                |              |
-  +-------------+              +-------------+-----------+
-  |                                          |           |
-+-v---------+ +--------------+         +-----v--------+  |
-| CLOUD SQL | |  VERTEX AI   |         |   SPANNER    |  |
-| (Postgre) | | (Embeddings) |         | (Native MCP) |  |
-+-----------+ +--------------+         +--------------+  |
-      ^              ^                        ^          |
-      |              |                        |          |
-      +--------------+-----------+------------+----------+
-                                 |
-                       (GCP Infrastructure)
+                             +--------------------------+
+                             |          USER            |
+                             +------------+-------------+
+                                          |
+                                          | (Natural Language)
+                                          |
+                  +-----------------------v-----------------------+      +-----------------------+
+                  |            TEAM ORCHESTRATOR                  |      |      ANY LLM          |
+                  |             (Master Agent)                    <------> (Gemini, Claude, etc) |
+                  +---+--------------+--------------+-------------+      +-----------+-----------+
+                      |              |              |             |                  |
+               (A2A)  |       (A2A)  |       (A2A)  |       (A2A) |                  |
+       +--------------v--+   +-------v-------+   +--v-----------+ +--v-----------+   |
+       |    JOBS AGENT   |   |  SPANNER AGT  |   | CURRENCY AGT | | WEATHER AGT  |   |
+       |  (Agentic RAG)  |   | (SpannerGraph)|   | (Custom MCP) | | (Mock Data)  |   |
+       +-------+---------+   +-------+-------+   +------+-------+ +--------------+   |
+               |                     |                  |                            |
+               |                     |                  |                            |
+        +------v-------+             |           +------v-------+                    |
+        | MCP TOOLBOX  |             |           |  CUSTOM MCP  |                    |
+        | (Middleware) |             |           |   (Server)   |                    |
+        +------+-------+             |           +--------------+                    |
+               |                     |                                               |
+  +------------+----------+          +--------------+-----------+                    |
+  |                       |                         |           |                    |
++-v---------+ +-----------v--+                +-----v--------+  |                    |
+| CLOUD SQL | |  VERTEX AI   |                |   SPANNER    |  |                    |
+| (Postgre) | | (Embeddings) |                | (Native MCP) |  |                    |
++-----------+ +--------------+                +--------------+  |                    |
+      ^              ^                               ^          |                    |
+      |              |                               |          |                    |
+      +--------------+---------------+---------------+----------+--------------------+
+                                     |
+                           (GCP Infrastructure)
 ```
 
 ## 🧠 Why is Spanner different from Cloud SQL?
