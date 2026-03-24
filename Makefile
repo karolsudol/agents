@@ -179,6 +179,16 @@ run-rag:
 run-spanner:
 	@$(MAKE) run-agent NAME=agent_spanner_mcp
 
+run-currency-mcp:
+	@echo "Running Currency MCP Server..."
+	cd python && uv run python mcp_servers/currency/server.py
+
+run-currency:
+	@$(MAKE) run-agent NAME=agent_currency
+
+run-a2a:
+	@$(MAKE) run-agent NAME=agent_team
+
 run-team-api:
 	@echo "Starting the Agent Team FastAPI server..."
 	cd python && uv run uvicorn agents.agent_team.main:app --host 0.0.0.0 --port 8000 --reload
