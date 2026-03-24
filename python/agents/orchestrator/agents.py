@@ -2,12 +2,12 @@ import os
 from typing import List
 from google.adk.agents import Agent, BaseAgent
 
-# Use Absolute Imports to prevent "beyond top-level package" errors
-from agents.finance.agent import root_agent as finance_director
-from agents.weather.agent import root_agent as logistics_agent
-from agents.orchestrator.tools import say_hello, say_goodbye
-from agents.orchestrator.plugins import CoolDownPlugin
-from agents.constants import DEFAULT_MODEL
+# Use direct imports (will work if PYTHONPATH includes the agents/ directory)
+from finance.agent import root_agent as finance_director
+from weather.agent import root_agent as logistics_agent
+from orchestrator.tools import say_hello, say_goodbye
+from orchestrator.plugins import CoolDownPlugin
+from constants import DEFAULT_MODEL
 
 # Determine Execution Path (Local vs Remote A2A)
 USE_REMOTE_A2A = os.environ.get("USE_REMOTE_A2A", "false").lower() == "true"
@@ -18,7 +18,6 @@ sub_agents: List[BaseAgent] = [finance_director, logistics_agent]
 
 if USE_REMOTE_A2A:
     print(f"[A2A] Initializing Remote A2A Connection for Jobs at {JOBS_SERVICE_URL}")
-    # Lazy import to avoid ModuleNotFoundError
     from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 
     jobs_remote = RemoteA2aAgent(
@@ -27,7 +26,7 @@ if USE_REMOTE_A2A:
     sub_agents.append(jobs_remote)
 else:
     print("[A2A] Running in Local Monolith Mode")
-    from agents.jobs.agent import root_agent as hr_director
+    from jobs.agent import root_agent as hr_director
 
     sub_agents.append(hr_director)
 

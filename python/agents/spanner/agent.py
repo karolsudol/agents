@@ -5,7 +5,7 @@ from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams
 import google.auth
 import google.auth.transport.requests
 from google.auth.credentials import Credentials
-from agents.constants import DEFAULT_MODEL
+from constants import DEFAULT_MODEL
 
 # Spanner MCP Configuration
 SPANNER_MCP_URL = "https://spanner.googleapis.com/mcp"

@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
-from agents.constants import DEFAULT_MODEL
+from constants import DEFAULT_MODEL
 import os
 
 # Define the path to the currency MCP server

@@ -202,7 +202,7 @@ run-agent:
 		make list-agents; \
 	else \
 		echo "Running agent $(NAME)..."; \
-		cd python && uv run --env-file ../.env adk run agents/$(NAME); \
+		cd python && PYTHONPATH=agents uv run --env-file ../.env adk run agents/$(NAME); \
 	fi
 
 add-dep:
