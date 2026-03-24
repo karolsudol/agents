@@ -1,19 +1,27 @@
-# 🤖 Weather Agent Team (Research Project)
+# 🏢 Corporate AI Hub (Master Orchestrator)
 
-This project demonstrates a multi-agent team with delegation, state management, and safety guardrails, all exposed via a FastAPI REST interface.
+This project demonstrates a production-grade multi-agent team following the **Agentverse Architect** model. It features delegation, persistent long-term memory, looping protocols, and advanced governance.
 
 ## 🏗️ Structure
-- **`agents.py`**: Root agent (Weather) + Sub-agents (Greeting, Farewell).
-- **`tools.py`**: State-aware weather lookup tool.
-- **`callbacks.py`**: Input/Tool guardrails (blocks "BLOCK" keyword and "Paris" weather).
+- **`agents.py`**: Corporate Hub Orchestrator + Sentinel Guardrail.
+- **`plugins.py`**: Governance Plugins (e.g., CoolDown/Governor).
+- **`services.py`**: Persistent Session Management (SQLite).
 - **`main.py`**: FastAPI entrypoint with `/chat` endpoint.
+
+## 🚀 Key Features
+1. **Long-Term Memory**: Uses SQLite to remember session state across restarts.
+2. **Looping Protocol**: The `risk_analyst` iteratively audits data until approved.
+3. **Parallel Execution**: Orchestrator can trigger simultaneous compliance and risk scans.
+4. **Governance**:
+   - **Sentinel**: Blocks forbidden terms (e.g., "internal secrets").
+   - **Governor**: Enforces a 60-second cooldown per session.
 
 ## 🚀 How to Run
 
 ### Option 1: CLI Mode (adk run)
 To run the agent in the terminal (standard ADK loop):
 ```bash
-make run-agent NAME=agent_team
+make run-a2a
 ```
 
 ### Option 2: REST API Mode (FastAPI)
@@ -32,14 +40,9 @@ make test-team-api
 curl -X POST "http://localhost:8000/chat" \
      -H "Content-Type: application/json" \
      -d '{
-           "user_id": "karol_1",
-           "session_id": "sess_001",
-           "message": "Hello, my name is Karol! What is the weather in London?",
+           "user_id": "manager_1",
+           "session_id": "audit_sess_001",
+           "message": "Run a full risk audit on the Spanner finance graph.",
            "temp_unit": "Celsius"
          }'
 ```
-
-## 🛡️ Guardrails to Test
-1. **Keyword Guardrail**: Try sending a message with the word "BLOCK".
-2. **Tool Guardrail**: Try asking for the weather in "Paris".
-3. **Delegation**: Try saying "Hi" or "Bye" - the root agent will delegate to the specialists!

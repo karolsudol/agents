@@ -12,8 +12,9 @@ variable "spanner_database_name" {
 
 resource "google_spanner_instance" "finance_instance" {
   name             = var.spanner_instance_name
-  config           = "regional-us-central1"
+  config           = "regional-${var.region}"
   display_name     = "Finance Instance"
+  edition          = "ENTERPRISE"
   num_nodes        = 1
   project          = var.project_id
 

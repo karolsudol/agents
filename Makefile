@@ -1,6 +1,39 @@
-.PHONY: install setup install-precommit lint activate shell run-a2a run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: help install setup install-precommit lint activate shell run-a2a run-a2a-remote run-a2a-ephemeral run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent infra-stop infra-start
 
 UV := $(shell command -v uv 2> /dev/null)
+
+help:
+	@echo "🏢 Corporate AI Hub - Available Commands:"
+	@echo ""
+	@echo "🔧 Setup & Environment:"
+	@echo "  make setup             - Install all binaries (uv, terraform, toolbox) and sync Python"
+	@echo "  make lint              - Run ruff, mypy, and pyright checks"
+	@echo ""
+	@echo "🏗️ Infrastructure (Terraform):"
+	@echo "  make infra-init        - Initialize Terraform"
+	@echo "  make infra-apply       - Deploy GCP resources (Cloud SQL, Spanner)"
+	@echo "  make infra-destroy     - Teardown all GCP resources"
+	@echo "  make infra-stop        - Pause Cloud SQL and Scale Down Spanner (Cost Saving)"
+	@echo "  make infra-start       - Resume Cloud SQL and Scale Up Spanner"
+	@echo "  make seed-db           - Seed Cloud SQL with jobs data"
+	@echo "  make seed-spanner      - Seed Spanner with finance graph data"
+	@echo ""
+	@echo "🚀 Execution (Local Monolith):"
+	@echo "  make run-toolbox       - Start MCP Toolbox (Middleware for SQL)"
+	@echo "  make run-a2a           - Run Corporate Hub (Persistent Memory)"
+	@echo "  make run-a2a-ephemeral - Run Corporate Hub (Short-term memory only)"
+	@echo ""
+	@echo "🌐 Execution (Remote A2A Services):"
+	@echo "  make run-jobs-service  - Start Jobs Domain as a standalone service (Port 8001)"
+	@echo "  make run-a2a-remote    - Run Orchestrator in Remote Discovery mode"
+	@echo ""
+	@echo "🖥️ UI & API:"
+	@echo "  make serve-agents      - Start Web UI at http://localhost:8000"
+	@echo "  make run-team-api      - Start Orchestrator as a FastAPI REST server"
+	@echo ""
+	@echo "☁️ Deployment (Cloud Run):"
+	@echo "  make deploy-toolbox    - Deploy MCP Toolbox to Cloud Run"
+	@echo "  make deploy-agent      - Deploy Orchestrator to Cloud Run"
 
 install-uv:
 ifndef UV
@@ -66,15 +99,20 @@ infra-apply: setup-terraform
 	./terraform -chdir=infra apply
 
 infra-stop: check-gcloud
-	@echo "Stopping Cloud SQL instance to save on instance costs..."
+	@echo "Pausing Cloud SQL instance..."
 	@set -a && . ./.env && set +a; \
 	gcloud sql instances patch jobs-db-instance --activation-policy=NEVER --project=$$GOOGLE_CLOUD_PROJECT --quiet
-	@echo "NOTE: Cloud Spanner does not support stopping. Scale it down to 100 processing units if you wish to minimize costs."
+	@echo "Scaling Down Spanner instance to 100 Processing Units (Min Cost)..."
+	@set -a && . ./.env && set +a; \
+	gcloud spanner instances update finance-instance --processing-units=100 --project=$$GOOGLE_CLOUD_PROJECT --quiet
 
 infra-start: check-gcloud
-	@echo "Starting Cloud SQL instance..."
+	@echo "Resuming Cloud SQL instance..."
 	@set -a && . ./.env && set +a; \
 	gcloud sql instances patch jobs-db-instance --activation-policy=ALWAYS --project=$$GOOGLE_CLOUD_PROJECT --quiet
+	@echo "Scaling Up Spanner instance to 1 Node..."
+	@set -a && . ./.env && set +a; \
+	gcloud spanner instances update finance-instance --nodes=1 --project=$$GOOGLE_CLOUD_PROJECT --quiet
 
 infra-destroy: check-gcloud setup-terraform
 	@echo "Destroying all infrastructure (Cloud SQL, Spanner, etc.)..."
@@ -91,7 +129,7 @@ infra-destroy: check-gcloud setup-terraform
 deploy-toolbox: check-gcloud
 	@echo "Deploying MCP Toolbox to Cloud Run..."
 	@set -a && . ./.env && set +a; \
-	cp toolbox tools.yaml deploy/toolbox/; \
+	cp toolbox python/mcp_servers/jobs_db/tools.yaml deploy/toolbox/; \
 	gcloud run deploy mcp-toolbox-service \
 		--source deploy/toolbox/ \
 		--region $$REGION \
@@ -116,14 +154,25 @@ deploy-agent: check-gcloud
 run-toolbox: setup-toolbox
 	@echo "Running MCP Toolbox..."
 	@set -a && . ./.env && set +a; \
-	./toolbox --tools-file tools.yaml
+	./toolbox --tools-file python/mcp_servers/jobs_db/tools.yaml
 
 # Seed Database
 seed-db: check-gcloud setup-sql-proxy
 	@echo "Seeding the database..."
 	@# Source the .env file to get DB_PASSWORD
 	@set -a && . ./.env && set +a; \
-	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < sql/cloud_sql_seed.sql
+	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < python/mcp_servers/jobs_db/cloud_sql_seed.sql
+
+sync-env:
+	@echo "Syncing Terraform outputs to .env..."
+	@if [ ! -f ".env" ]; then cp .env.example .env; fi
+	@PASS=$$(./terraform -chdir=infra output -raw db_password); \
+	if [ -n "$$PASS" ]; then \
+		sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=\"$$PASS\"/" .env; \
+		echo "DB_PASSWORD synchronized."; \
+	else \
+		echo "Error: Could not retrieve password from Terraform. run make infra-apply first."; \
+	fi
 
 # Seed Spanner
 seed-spanner: check-gcloud
@@ -153,13 +202,13 @@ run-agent:
 		make list-agents; \
 	else \
 		echo "Running agent $(NAME)..."; \
-		cd python && uv run --env-file ../.env adk run agents/$(NAME); \
+		cd python && PYTHONPATH=agents uv run --env-file ../.env adk run agents/$(NAME); \
 	fi
 
 add-dep:
 	@if [ -z "$(PKG)" ]; then \
 		echo "Usage: make add-dep PKG=package_name"; \
-	else \
+		else \
 		echo "Installing $(PKG) with uv..."; \
 		cd python && uv add $(PKG); \
 	fi
@@ -169,7 +218,21 @@ run-currency-mcp:
 	cd python && uv run python mcp_servers/currency/server.py
 
 run-a2a:
+	@echo "Running Corporate Hub in LOCAL Monolith Mode (Persistent Memory)..."
 	@$(MAKE) run-agent NAME=orchestrator
+
+run-a2a-ephemeral:
+	@echo "Running Corporate Hub in EPHEMERAL Mode (Short-term memory only)..."
+	cd python && PERSISTENT_MEMORY=false uv run --env-file ../.env adk run agents/orchestrator
+
+# REMOTE A2A Path
+run-jobs-service:
+	@echo "Starting standalone Jobs A2A Service on port 8001..."
+	cd python && uv run python agents/jobs/main.py
+
+run-a2a-remote:
+	@echo "Running Corporate Hub in REMOTE A2A Mode (Discovery)..."
+	cd python && USE_REMOTE_A2A=true JOBS_SERVICE_URL=http://localhost:8001 uv run --env-file ../.env adk run agents/orchestrator
 
 run-team-api:
 	@echo "Starting the Agent Orchestrator FastAPI server..."
@@ -184,7 +247,7 @@ test-team-api:
 
 serve-agents:
 	@echo "Serving the agents web interface on port 8000..."
-	cd python && uv run --env-file ../.env adk web agents --port 8000
+	cd python && PYTHONPATH=agents uv run --env-file ../.env adk web agents --port 8000
 
 lint:
 	cd python && uv run ruff check . --fix

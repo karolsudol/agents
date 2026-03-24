@@ -204,13 +204,16 @@ cython_debug/
 # ADK
 .adk/
 session.db
+sessions.db
+sessions_storage.json
 
 # Terraform
 .terraform/
 *.tfstate
-*.tfstate.backup
+*.tfstate.*
 .terraform.lock.hcl
 terraform
+terraform.zip
 
 # MCP Toolbox
 toolbox
