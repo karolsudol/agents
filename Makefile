@@ -1,4 +1,4 @@
-.PHONY: help install setup install-precommit lint activate shell run-a2a run-a2a-remote run-a2a-ephemeral run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: help install setup install-precommit lint activate shell run-a2a run-a2a-remote run-a2a-ephemeral run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent infra-stop infra-start
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -13,6 +13,8 @@ help:
 	@echo "  make infra-init        - Initialize Terraform"
 	@echo "  make infra-apply       - Deploy GCP resources (Cloud SQL, Spanner)"
 	@echo "  make infra-destroy     - Teardown all GCP resources"
+	@echo "  make infra-stop        - Pause Cloud SQL and Scale Down Spanner (Cost Saving)"
+	@echo "  make infra-start       - Resume Cloud SQL and Scale Up Spanner"
 	@echo "  make seed-db           - Seed Cloud SQL with jobs data"
 	@echo "  make seed-spanner      - Seed Spanner with finance graph data"
 	@echo ""
@@ -97,15 +99,20 @@ infra-apply: setup-terraform
 	./terraform -chdir=infra apply
 
 infra-stop: check-gcloud
-	@echo "Stopping Cloud SQL instance to save on instance costs..."
+	@echo "Pausing Cloud SQL instance..."
 	@set -a && . ./.env && set +a; \
 	gcloud sql instances patch jobs-db-instance --activation-policy=NEVER --project=$$GOOGLE_CLOUD_PROJECT --quiet
-	@echo "NOTE: Cloud Spanner does not support stopping. Scale it down to 100 processing units if you wish to minimize costs."
+	@echo "Scaling Down Spanner instance to 100 Processing Units (Min Cost)..."
+	@set -a && . ./.env && set +a; \
+	gcloud spanner instances update finance-instance --processing-units=100 --project=$$GOOGLE_CLOUD_PROJECT --quiet
 
 infra-start: check-gcloud
-	@echo "Starting Cloud SQL instance..."
+	@echo "Resuming Cloud SQL instance..."
 	@set -a && . ./.env && set +a; \
 	gcloud sql instances patch jobs-db-instance --activation-policy=ALWAYS --project=$$GOOGLE_CLOUD_PROJECT --quiet
+	@echo "Scaling Up Spanner instance to 1 Node..."
+	@set -a && . ./.env && set +a; \
+	gcloud spanner instances update finance-instance --nodes=1 --project=$$GOOGLE_CLOUD_PROJECT --quiet
 
 infra-destroy: check-gcloud setup-terraform
 	@echo "Destroying all infrastructure (Cloud SQL, Spanner, etc.)..."
