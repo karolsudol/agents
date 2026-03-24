@@ -18,7 +18,7 @@ This system follows a 5-layer model: **User Interface** $\rightarrow$ **Orchestr
 |                                (Corporate Hub Orchestrator)                                 |
 +------+----------------------+---------------+-----------------------+-----------------------+
        |                      |               |                       |                       |
-       | (Long-Term Memory)   | (A2A)         | (A2A - Parallel)      | (A2A)                 | (A2A)
+       | (Long-Term Memory)   | (A2A - Local) | (A2A - Parallel)      | (A2A - Local)         | (A2A)
 +------v--------------+  +----v----------+ +--v-----------+  +--------v-------+  +------------v---+
 |  PERSISTENT STATE   |  |  HR DIRECTOR  | | AUDIT OFFICE  |  |FINANCE DIRECTOR|  |LOGISTICS AGENT |
 | (SQLite Storage)    |  | (Agentic RAG) | |(Parallel Exec)|  | (Hierarchical) |  | (Custom MCP)   |
@@ -46,23 +46,21 @@ This system follows a 5-layer model: **User Interface** $\rightarrow$ **Orchestr
 
 ## 🧠 Key Capabilities Demonstrated
 
-1.  **Hierarchical Routing**: The `Orchestrator` delegates to the `Finance Director`, who further routes requests to `Risk` or `Treasury`. This multi-level hierarchy mimics real corporate structures.
-2.  **Iterative Looping Agent**: The `Risk Analyst` follows a strict `Gather -> Audit -> Refine` protocol, ensuring reports are perfect before reaching the user.
-3.  **Parallel Execution**: The `Audit Office` runs `Compliance` and `Legal` scans simultaneously, significantly reducing latency for multi-factor validations.
-4.  **Hybrid Memory System**:
-    *   **Short-Term Memory**: ADK `Context` tracks conversation history and user intent within the current turn.
-    *   **Long-Term Memory**: Persistent `SqliteSessionService` stores user state (e.g., "preferred currency: EUR") across days and restarts.
-5.  **Agentic RAG**: The `HR Agent` performs semantic vector search using Vertex AI and Cloud SQL `pgvector`.
+1.  **Hierarchical Routing**: Master Hub $\rightarrow$ Finance Director $\rightarrow$ Risk Analyst.
+2.  **Iterative Looping**: The Risk Analyst follows a strict `Gather -> Audit -> Refine` protocol.
+3.  **Parallel Execution**: Simultaneous Compliance and Legal scans.
+4.  **Hybrid Memory**: Persistent SQLite storage for cross-session state + Turn-based context.
+5.  **Governance & Safety**: Sentinel Guardrails and Session Cooldowns.
 
 ---
 
 ## 🚀 Execution
 
 ### Local Development
-- **Start Stack**:
-  - Terminal 1: `make run-toolbox` (Required for Cloud SQL)
-  - Terminal 2: `make run-a2a` (Starts the Orchestrator)
-- **Web UI**: `make serve-agents` (Visual interface at http://localhost:8000)
+- **Start All Services**:
+  - Terminal 1: `make run-toolbox` (Required for Cloud SQL features)
+  - Terminal 2: `make run-a2a` (Starts the Corporate Hub)
+- **Web UI**: `make serve-agents` (Interact at http://localhost:8000)
 
 ### Production Deployment
 ```bash

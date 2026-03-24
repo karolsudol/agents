@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-a2a run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: install setup install-precommit lint activate shell run-a2a run-a2a-remote run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -169,7 +169,17 @@ run-currency-mcp:
 	cd python && uv run python mcp_servers/currency/server.py
 
 run-a2a:
+	@echo "Running Corporate Hub in LOCAL Monolith Mode..."
 	@$(MAKE) run-agent NAME=orchestrator
+
+# REMOTE A2A Path
+run-jobs-service:
+	@echo "Starting standalone Jobs A2A Service on port 8001..."
+	cd python && uv run python agents/jobs/main.py
+
+run-a2a-remote:
+	@echo "Running Corporate Hub in REMOTE A2A Mode (Discovery)..."
+	cd python && USE_REMOTE_A2A=true JOBS_SERVICE_URL=http://localhost:8001 uv run --env-file ../.env adk run agents/orchestrator
 
 run-team-api:
 	@echo "Starting the Agent Orchestrator FastAPI server..."
