@@ -1,6 +1,6 @@
 from google.adk.sessions import InMemorySessionService
 from google.adk.runners import Runner
-from .agents import weather_agent_team
+from .agents import team_orchestrator
 
 # Constant for the entire app
 APP_NAME = "agent_team_app"
@@ -12,5 +12,5 @@ session_service = InMemorySessionService()
 def create_request_runner():
     """Creates a FRESH runner for the current request using the shared session service."""
     return Runner(
-        agent=weather_agent_team, app_name=APP_NAME, session_service=session_service
+        agent=team_orchestrator, app_name=APP_NAME, session_service=session_service
     )

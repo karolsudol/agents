@@ -1,11 +1,11 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: install setup install-precommit lint activate shell run-a2a run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
 
 UV := $(shell command -v uv 2> /dev/null)
 
 install-uv:
 ifndef UV
 	@echo "Installing uv..."
-	curl -LsSf https://astral.sh/uv/install.sh | sh
+	curl -LsSf https://astral.sh/uv/install.sh | ph
 else
 	@echo "uv is already installed."
 endif
@@ -100,7 +100,7 @@ deploy-toolbox: check-gcloud
 		--allow-unauthenticated
 
 deploy-agent: check-gcloud
-	@echo "Deploying ADK Agents to Cloud Run..."
+	@echo "Deploying ADK Agent Orchestrator to Cloud Run..."
 	@set -a && . ./.env && set +a; \
 	cp python/pyproject.toml python/uv.lock deploy/agent/; \
 	cp -r python/agents deploy/agent/; \
@@ -109,7 +109,7 @@ deploy-agent: check-gcloud
 		--source deploy/agent/ \
 		--region $$REGION \
 		--project $$GOOGLE_CLOUD_PROJECT \
-		--set-env-vars TOOLBOX_URL=$$TOOLBOX_URL,GOOGLE_CLOUD_PROJECT=$$GOOGLE_CLOUD_PROJECT,REGION=$$REGION \
+		--set-env-vars TOOLBOX_URL=$$TOOLBOX_URL,GOOGLE_CLOUD_PROJECT=$$GOOGLE_CLOUD_PROJECT,REGION=$$REGION,ADK_AGENT=agents/orchestrator \
 		--allow-unauthenticated
 
 # Run MCP Toolbox
@@ -164,27 +164,19 @@ add-dep:
 		cd python && uv add $(PKG); \
 	fi
 
-run-single:
-	@$(MAKE) run-agent NAME=single_tool_agent
+run-currency-mcp:
+	@echo "Running Currency MCP Server..."
+	cd python && uv run python mcp_servers/currency/server.py
 
-run-multi:
-	@$(MAKE) run-agent NAME=multi_tool_agent
-
-run-multimodal:
-	@$(MAKE) run-agent NAME=multimodal_agent
-
-run-rag:
-	@$(MAKE) run-agent NAME=agent_toolbox_mcp
-
-run-spanner:
-	@$(MAKE) run-agent NAME=agent_spanner_mcp
+run-a2a:
+	@$(MAKE) run-agent NAME=orchestrator
 
 run-team-api:
-	@echo "Starting the Agent Team FastAPI server..."
-	cd python && uv run uvicorn agents.agent_team.main:app --host 0.0.0.0 --port 8000 --reload
+	@echo "Starting the Agent Orchestrator FastAPI server..."
+	cd python && uv run uvicorn agents.orchestrator.main:app --host 0.0.0.0 --port 8000 --reload
 
 test-team-api:
-	@echo "Testing the Agent Team API..."
+	@echo "Testing the Agent Orchestrator API..."
 	curl -X POST "http://localhost:8000/chat" \
 		 -H "Content-Type: application/json" \
 		 -d '{"user_id": "test_user", "session_id": "test_session", "message": "Hi, I am Karol! What is the weather in Tokyo?", "temp_unit": "Celsius"}'

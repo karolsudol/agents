@@ -1,6 +1,7 @@
 import datetime
 from zoneinfo import ZoneInfo
 from google.adk.agents.llm_agent import Agent
+from ..constants import DEFAULT_MODEL
 
 
 def get_weather(city: str) -> dict[str, str]:
@@ -52,7 +53,7 @@ def get_current_time(city: str) -> dict[str, str]:
 
 
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model=DEFAULT_MODEL,
     name="weather_time_agent",
     description=("Agent to answer questions about the time and weather in a city."),
     instruction=(

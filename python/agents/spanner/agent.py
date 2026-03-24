@@ -1,28 +1,46 @@
+from typing import cast, Dict, Sequence, Any
 from google.adk.agents import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams
 import google.auth
 import google.auth.transport.requests
+from google.auth.credentials import Credentials
+from ..constants import DEFAULT_MODEL
 
 # Spanner MCP Configuration
 SPANNER_MCP_URL = "https://spanner.googleapis.com/mcp"
 
 
-def get_google_auth_headers():
-    credentials, project = google.auth.default(
-        scopes=[
-            "https://www.googleapis.com/auth/spanner.admin",
-            "https://www.googleapis.com/auth/spanner.data",
-            "https://www.googleapis.com/auth/cloud-platform",
-        ]
-    )
-    auth_request = google.auth.transport.requests.Request()
-    credentials.refresh(auth_request)
+def get_google_auth_headers() -> Dict[str, str]:
+    """Retrieves Google Auth headers for Spanner MCP connection."""
+    scopes: Sequence[str] = [
+        "https://www.googleapis.com/auth/spanner.admin",
+        "https://www.googleapis.com/auth/spanner.data",
+        "https://www.googleapis.com/auth/cloud-platform",
+    ]
+
+    # We cast the entire google.auth module to Any to stop Pylance from
+    # looking at the 'default' function's partially unknown signature.
+    # This is the most effective way to silence VS Code warnings for stubless libs.
+    auth_module: Any = google.auth
+    credentials_info = auth_module.default(scopes=scopes)
+
+    credentials = cast(Credentials, credentials_info[0])
+
+    # Do the same for the transport request to be safe
+    transport_module: Any = google.auth.transport.requests
+    auth_request = transport_module.Request()
+
+    # Cast credentials to Any to call refresh without signature warnings
+    cast(Any, credentials).refresh(auth_request)
+
+    if not credentials.token:
+        return {}
+
     return {"Authorization": f"Bearer {credentials.token}"}
 
 
 # Initialize the Spanner MCP Toolset
-# Note: SseConnectionParams expects headers for the initial connection
 spanner_toolset = McpToolset(
     connection_params=SseConnectionParams(
         url=SPANNER_MCP_URL, headers=get_google_auth_headers()
@@ -31,7 +49,7 @@ spanner_toolset = McpToolset(
 
 root_agent = Agent(
     name="spanner_graph_agent",
-    model="gemini-1.5-flash",
+    model=DEFAULT_MODEL,
     description="An agent specialized in financial fraud detection using Spanner Property Graphs.",
     instruction="""You are a Fraud Detection Expert. You have access to a Cloud Spanner database with a financial property graph (FinGraph).
     Your task is to:

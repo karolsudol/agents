@@ -2,16 +2,15 @@
 import os
 from google.adk.agents import Agent
 from google.adk.tools.toolbox_toolset import ToolboxToolset
+from ..constants import DEFAULT_MODEL
 
 # Toolbox URL should point to the MCP Toolbox server
 TOOLBOX_URL = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
 toolbox = ToolboxToolset(TOOLBOX_URL)
 
-MODEL_GEMINI_2_5_FLASH = "gemini-2.5-flash"
-
 root_agent = Agent(
     name="jobs_agent",
-    model=MODEL_GEMINI_2_5_FLASH,
+    model=DEFAULT_MODEL,
     description="A helpful assistant at 'TechJobs', a tech job listing platform.",
     instruction="""You are a helpful assistant at "TechJobs," a tech job listing platform.
 Your job:
