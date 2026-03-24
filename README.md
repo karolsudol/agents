@@ -1,12 +1,12 @@
-# AI Agents Collection
+# Corporate AI Hub (Agentverse Architecture)
 
 <img src="adk.png" width="200" alt="Agent Development Kit">
 
-A collection of AI agents built with the **Agent Development Kit (ADK)**, the **Model Context Protocol (MCP)**, and **Retrieval-Augmented Generation (RAG)**.
+A production-grade collection of AI agents following the **Agentverse Architect** model. This system manages corporate operations across HR, Finance, and Logistics using **Agent-to-Agent (A2A)** orchestration, **Model Context Protocol (MCP)**, and **Long-Term Memory**.
 
-## 🏗️ Agentverse Architecture
+## 🏗️ Architecture Overview
 
-Following the **Agentverse** model, this repository is structured into distinct layers of responsibility: **Orchestration**, **Domain Workflows**, and **Managed Tools**.
+The system is structured into four layers: **Orchestration**, **Domain Workflows**, **Managed Tooling**, and **Persistent Storage**.
 
 ```text
                                 +---------------------------+
@@ -17,13 +17,13 @@ Following the **Agentverse** model, this repository is structured into distinct 
                                               |
 +---------------------------------------------v-----------------------------------------------+
 |                                     ORCHESTRATION LAYER                                     |
-|                                    (Master Orchestrator)                                    |
+|                                (Corporate Hub Orchestrator)                                 |
 +------+----------------------+---------------+-----------------------+-----------------------+
        |                      |               |                       |                       |
-       | (State/Memory)       | (A2A)         | (A2A)                 | (A2A)                 | (A2A)
+       | (Long-Term Memory)   | (A2A)         | (A2A - Looping)       | (A2A - Parallel)      | (A2A)
 +------v--------------+  +----v----------+ +--v-----------+  +--------v-------+  +------------v---+
-|   SESSION MEMORY    |  |  JOBS DOMAIN  | | FINANCE DOMAIN |  | CURRENCY DOMAIN|  | WEATHER DOMAIN |
-| (InMemory/Database) |  | (Agentic RAG) | | (Graph/Spanner)|  |  (Custom MCP)  |  |  (Custom MCP)  |
+|  PERSISTENT STATE   |  | HR/RECRUITMENT| | RISK ANALYST  |  |  COMPLIANCE    |  | TREASURY/FX    |
+| (JSON/Local File)   |  | (Agentic RAG) | |(Iterative Loop)|  | (Parallel Scan)|  | (Custom MCP)   |
 +---------------------+  +-------+-------+ +------+-------+  +--------+-------+  +-------+--------+
                                  |                |                   |                  |
 +--------------------------------v----------------v-------------------v------------------v-------+
@@ -37,47 +37,27 @@ Following the **Agentverse** model, this repository is structured into distinct 
 |      CLOUD SQL      |  |     SPANNER    |      |    EXTERNAL    |       |    OPEN-METEO   |
 |     (PostgreSQL)    |  |  (PropertyGraph)|      |   EXCHANGE     |       |    REST API     |
 +---------------------+  +----------------+      +----------------+       +----------------+
-           |                      |                       |                        |
-           +----------------------+-----------+-----------+------------------------+
-                                              |
-                                    (GCP Infrastructure)
 ```
 
-## 🔍 Architecture Layers
+## 🧠 Key Agentverse Patterns
 
-1.  **Orchestration Layer**: The "Brain" that manages the conversation flow. It uses **Agent-to-Agent (A2A)** calls to delegate to specialized domains.
-2.  **Domain Workflows**: Specialist agents (Jobs, Spanner, Currency, Weather) that have deep knowledge of their specific domain and available tools.
-3.  **Managed Tooling (MCP)**: The standardized communication layer. Whether it's a native Google service or a custom REST wrapper, everything speaks MCP.
-4.  **Session Memory**: Manages state across turns, ensuring the Orchestrator remembers user preferences (like temperature units or job interests).
+1.  **Orchestration & Safety**: The **Sentinel Guardrail** intercepts high-risk queries, while the **CoolDown Plugin** prevents system overload.
+2.  **Long-Term Memory**: The `PersistentSessionService` ensures the hub remembers user preferences and context across restarts by storing state in `sessions_storage.json`.
+3.  **Looping Protocol (Risk Analyst)**: The Risk agent follows a `Gather -> Audit -> Refine` loop, ensuring zero-error financial reports.
+4.  **Parallel Execution (Compliance)**: The Orchestrator can trigger compliance and risk scans simultaneously to provide a comprehensive corporate audit.
+5.  **Agentic RAG**: The HR Agent uses Vertex AI Embeddings and pgvector to semantically match candidates to job descriptions.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Execution
 
-### 1. Setup & Environment
-Install required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
-```bash
-make setup
-```
+### Local Development
+- **Start All Services**:
+  - Terminal 1: `make run-toolbox` (Required for Cloud SQL features)
+  - Terminal 2: `make run-a2a` (Starts the Corporate Hub)
+- **Web UI**: `make serve-agents` (Interact at http://localhost:8000)
 
-### 2. Infrastructure & Database
-Provision GCP resources and seed the databases.
-```bash
-make infra-init
-make infra-apply
-make seed-db       # Seed Cloud SQL
-make seed-spanner  # Seed Spanner Graph
-```
-
-### 3. Execution
-
-#### Local Development
-- **Master Orchestrator (A2A)**:
-  - Terminal 1: `make run-toolbox` (Middleware for SQL)
-  - Terminal 2: `make run-a2a` (Orchestrator that coordinates all domains)
-- **Web UI**: `make serve-agents` (Visual interface at http://localhost:8000)
-
-#### Cloud Deployment
+### Production Deployment
 ```bash
 make deploy-toolbox
 make deploy-agent
@@ -86,7 +66,7 @@ make deploy-agent
 ---
 
 ## 📂 Project Structure
-- `python/agents/orchestrator/`: Master coordinator (The "Brain").
-- `python/agents/[domain]/`: Specialist domain agents (Jobs, Spanner, etc.).
-- `python/mcp_servers/`: Custom MCP implementations for REST APIs and logic.
-- `infra/`: Terraform for all GCP resources.
+- `python/agents/orchestrator/`: Hub Orchestrator, Sentinel, and Governance Plugins.
+- `python/agents/finance/`: Risk Analyst (Looping) and Compliance (Parallel).
+- `python/agents/jobs/`: HR specialist using Agentic RAG.
+- `python/mcp_servers/`: Custom MCP implementations for Currency and Weather APIs.

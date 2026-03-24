@@ -1,16 +1,17 @@
-from google.adk.sessions import InMemorySessionService
+from google.adk.sessions.sqlite_session_service import SqliteSessionService
 from google.adk.runners import Runner
 from .agents import team_orchestrator
 
-# Constant for the entire app
-APP_NAME = "agent_team_app"
+# Configuration
+APP_NAME = "corporate_hub"
+DB_PATH = "sessions.db"
 
-# Singleton session service
-session_service = InMemorySessionService()
+# Use built-in SqliteSessionService for local persistence (Long-Term Memory)
+session_service = SqliteSessionService(db_path=DB_PATH)
 
 
 def create_request_runner():
-    """Creates a FRESH runner for the current request using the shared session service."""
+    """Creates a FRESH runner using the persistent SQLite session service."""
     return Runner(
         agent=team_orchestrator, app_name=APP_NAME, session_service=session_service
     )
