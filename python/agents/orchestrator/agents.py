@@ -1,7 +1,6 @@
 import os
 from typing import List
 from google.adk.agents import Agent, BaseAgent
-from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 
 # Local Imports
 from ..finance.agent import root_agent as finance_director
@@ -15,13 +14,13 @@ USE_REMOTE_A2A = os.environ.get("USE_REMOTE_A2A", "false").lower() == "true"
 JOBS_SERVICE_URL = os.environ.get("JOBS_SERVICE_URL", "http://localhost:8001")
 
 # Specialized Agents container
-# We use list[BaseAgent] to avoid type invariance issues with pyright
 sub_agents: List[BaseAgent] = [finance_director, logistics_agent]
 
 if USE_REMOTE_A2A:
     print(f"[A2A] Initializing Remote A2A Connection for Jobs at {JOBS_SERVICE_URL}")
-    # Using the RemoteA2aAgent Pattern (Enterprise Pattern)
-    # The agent_card can be a URL to the remote service's metadata
+    # Lazy import to avoid ModuleNotFoundError when running locally without a2a lib
+    from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
+
     jobs_remote = RemoteA2aAgent(
         name="hr_recruitment_service", agent_card=JOBS_SERVICE_URL
     )
@@ -35,6 +34,15 @@ else:
 # Governance
 cooldown_governor = CoolDownPlugin(cooldown_seconds=60)
 
+# Specialists for Parallel Demo
+compliance_scanner = Agent(
+    name="compliance_scanner", model=DEFAULT_MODEL, description="Scans policies."
+)
+legal_reviewer = Agent(
+    name="legal_reviewer", model=DEFAULT_MODEL, description="Reviews legal risks."
+)
+sub_agents.extend([compliance_scanner, legal_reviewer])
+
 # ROOT AGENT: The Corporate Hub (Master Orchestrator)
 team_orchestrator = Agent(
     name="corporate_hub_orchestrator",
@@ -43,12 +51,21 @@ team_orchestrator = Agent(
     instruction=f"""You are the Master Orchestrator.
     Execution Mode: {"Remote A2A" if USE_REMOTE_A2A else "Local Monolith"}.
 
-    Delegate to specialized departments:
-    - HR/Recruitment: Use 'hr_recruitment_service'.
-    - Finance/Risk: Delegate to 'finance_director'.
-    - Logistics: Delegate to 'logistics_agent'.
+    Follow these capability protocols:
 
-    Coordinate across domains to fulfill corporate requests.""",
+    1. HIERARCHICAL ROUTING:
+       - Delegate to 'finance_director' for ALL financial, FX, or risk tasks.
+       - Delegate to {"hr_recruitment_service" if USE_REMOTE_A2A else "hr_director"} for recruitment/jobs.
+       - Delegate to 'logistics_agent' for weather/external conditions.
+
+    2. PARALLEL EXECUTION:
+       - For corporate audits, SUMMON 'compliance_scanner' and 'legal_reviewer' SIMULTANEOUSLY.
+
+    3. MEMORY:
+       - SHORT-TERM: Use session state to track context.
+       - LONG-TERM: Reference the persistent store for past interactions.
+
+    Synthesize all results into a professional corporate briefing.""",
     tools=[say_hello, say_goodbye],
     sub_agents=sub_agents,
     before_agent_callback=cooldown_governor.before_agent_callback,
