@@ -7,7 +7,9 @@ resource "google_cloud_run_v2_service" "toolbox" {
   template {
     service_account = google_service_account.toolbox_sa.email
     containers {
-      image = "gcr.io/${var.project_id}/mcp-toolbox"
+      # Use a placeholder image so Terraform can finish.
+      # 'make deploy-toolbox' will overwrite this with the real image.
+      image = "gcr.io/cloudrun/hello"
 
       env {
         name  = "DB_PASSWORD"
@@ -28,6 +30,9 @@ resource "google_cloud_run_v2_service" "toolbox" {
     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
     percent = 100
   }
+
+  # Ensure APIs are enabled before creating service
+  depends_on = [google_project_service.apis]
 }
 
 # Resource: Cloud Run Service for the ADK Agents
@@ -39,7 +44,9 @@ resource "google_cloud_run_v2_service" "agents" {
   template {
     service_account = google_service_account.agent_sa.email
     containers {
-      image = "gcr.io/${var.project_id}/adk-agents"
+      # Use a placeholder image so Terraform can finish.
+      # 'make deploy-agent' will overwrite this with the real image.
+      image = "gcr.io/cloudrun/hello"
 
       env {
         name  = "TOOLBOX_URL"
@@ -60,6 +67,8 @@ resource "google_cloud_run_v2_service" "agents" {
     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
     percent = 100
   }
+
+  depends_on = [google_project_service.apis]
 }
 
 # Allow unauthenticated access for demo purposes

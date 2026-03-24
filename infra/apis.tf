@@ -5,7 +5,8 @@ resource "google_project_service" "apis" {
     "run.googleapis.com",
     "secretmanager.googleapis.com",
     "compute.googleapis.com",
-    "cloudbuild.googleapis.com"
+    "cloudbuild.googleapis.com",
+    "spanner.googleapis.com"
   ])
 
   project = var.project_id

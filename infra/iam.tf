@@ -1,13 +1,17 @@
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 # Service Account for the MCP Toolbox
 resource "google_service_account" "toolbox_sa" {
-  account_id   = "mcp-toolbox-sa"
+  account_id   = "mcp-toolbox-sa-${random_id.suffix.hex}"
   display_name = "MCP Toolbox Service Account"
   project      = var.project_id
 }
 
 # Service Account for the ADK Agent
 resource "google_service_account" "agent_sa" {
-  account_id   = "adk-agent-sa"
+  account_id   = "adk-agent-sa-${random_id.suffix.hex}"
   display_name = "ADK Agent Service Account"
   project      = var.project_id
 }
@@ -16,6 +20,13 @@ resource "google_service_account" "agent_sa" {
 resource "google_project_iam_member" "agent_vertex_ai_user" {
   project = var.project_id
   role    = "roles/aiplatform.user"
+  member  = "serviceAccount:${google_service_account.agent_sa.email}"
+}
+
+# Grant Agent SA Spanner roles (Admin for demo setup, Data for operations)
+resource "google_project_iam_member" "agent_spanner_admin" {
+  project = var.project_id
+  role    = "roles/spanner.admin"
   member  = "serviceAccount:${google_service_account.agent_sa.email}"
 }
 

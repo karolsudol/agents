@@ -73,6 +73,7 @@ make help              # See all available automation commands
 
 ### 2. Infrastructure & Database
 ```bash
+make infra-init        # Initialize Terraform providers
 make infra-apply       # Provision GCP resources
 make seed-db           # Seed Cloud SQL (pgvector)
 make seed-spanner      # Seed Spanner Graph
@@ -92,4 +93,17 @@ make run-a2a      # Start Hub with Persistent Memory
 ```bash
 make run-jobs-service  # Start HR Service (Port 8001)
 make run-a2a-remote    # Start Orchestrator in Network Discovery Mode
+```
+
+---
+
+## 💰 Cost Management
+Cloud SQL and Spanner can be expensive. You can "pause" the Cloud SQL instance when not in use:
+- **Pause Instance**: `make infra-stop`
+- **Resume Instance**: `make infra-start`
+
+## 🧹 Cleanup
+To delete all GCP resources (Cloud SQL, Spanner, etc.) and clean up local artifacts:
+```bash
+make infra-destroy
 ```
