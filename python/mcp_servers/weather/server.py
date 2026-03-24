@@ -1,5 +1,6 @@
 import mcp.server.fastmcp as fastmcp
 import httpx
+from typing import Dict, Any
 
 # Initialize FastMCP server
 mcp = fastmcp.FastMCP("Weather Service")
@@ -29,7 +30,8 @@ async def get_weather(city: str) -> str:
     coords = CITIES[city_lower]
 
     url = "https://api.open-meteo.com/v1/forecast"
-    params = {
+    # Explicitly type the dictionary to satisfy Pyright/Pylance "partially unknown" checks
+    params: Dict[str, Any] = {
         "latitude": coords["lat"],
         "longitude": coords["lon"],
         "current_weather": "true",
