@@ -86,6 +86,7 @@ cp .env.example .env
 ```bash
 make infra-init        # Initialize Terraform providers
 make infra-apply       # Provision GCP resources
+make sync-env          # Automatically pull DB_PASSWORD into .env
 make seed-db           # Seed Cloud SQL (pgvector)
 make seed-spanner      # Seed Spanner Graph
 ```

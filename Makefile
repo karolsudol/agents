@@ -163,6 +163,17 @@ seed-db: check-gcloud setup-sql-proxy
 	@set -a && . ./.env && set +a; \
 	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < python/mcp_servers/jobs_db/cloud_sql_seed.sql
 
+sync-env:
+	@echo "Syncing Terraform outputs to .env..."
+	@if [ ! -f ".env" ]; then cp .env.example .env; fi
+	@PASS=$$(./terraform -chdir=infra output -raw db_password); \
+	if [ -n "$$PASS" ]; then \
+		sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=\"$$PASS\"/" .env; \
+		echo "DB_PASSWORD synchronized."; \
+	else \
+		echo "Error: Could not retrieve password from Terraform. run make infra-apply first."; \
+	fi
+
 # Seed Spanner
 seed-spanner: check-gcloud
 	@echo "Seeding Spanner database..."
