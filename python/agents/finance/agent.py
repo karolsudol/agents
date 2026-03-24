@@ -1,7 +1,7 @@
 from google.adk.agents import Agent
-from ..currency.agent import root_agent as treasury_agent
-from ..spanner.agent import root_agent as spanner_agent
-from ..constants import DEFAULT_MODEL
+from agents.currency.agent import root_agent as treasury_agent
+from agents.spanner.agent import root_agent as spanner_agent
+from agents.constants import DEFAULT_MODEL
 
 # specialist 1: The Data Gatherer (Used by Risk)
 data_gatherer = Agent(

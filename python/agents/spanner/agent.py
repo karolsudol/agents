@@ -5,7 +5,7 @@ from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams
 import google.auth
 import google.auth.transport.requests
 from google.auth.credentials import Credentials
-from ..constants import DEFAULT_MODEL
+from agents.constants import DEFAULT_MODEL
 
 # Spanner MCP Configuration
 SPANNER_MCP_URL = "https://spanner.googleapis.com/mcp"
@@ -19,19 +19,12 @@ def get_google_auth_headers() -> Dict[str, str]:
         "https://www.googleapis.com/auth/cloud-platform",
     ]
 
-    # We cast the entire google.auth module to Any to stop Pylance from
-    # looking at the 'default' function's partially unknown signature.
-    # This is the most effective way to silence VS Code warnings for stubless libs.
     auth_module: Any = google.auth
     credentials_info = auth_module.default(scopes=scopes)
 
     credentials = cast(Credentials, credentials_info[0])
-
-    # Do the same for the transport request to be safe
     transport_module: Any = google.auth.transport.requests
     auth_request = transport_module.Request()
-
-    # Cast credentials to Any to call refresh without signature warnings
     cast(Any, credentials).refresh(auth_request)
 
     if not credentials.token:

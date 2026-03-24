@@ -3,7 +3,7 @@ from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
 import os
-from ..constants import DEFAULT_MODEL
+from agents.constants import DEFAULT_MODEL
 
 # Define the path to the weather MCP server
 WEATHER_SERVER_PATH = os.path.join(
@@ -23,7 +23,7 @@ weather_toolset = McpToolset(
 root_agent = Agent(
     name="weather_agent",
     model=DEFAULT_MODEL,
-    description="An agent specialized in fetching real-time weather data via a REST-based MCP server.",
+    description="An agent specialized in fetching real-time weather data.",
     instruction="""You are a Weather Expert. You fetch REAL-TIME weather data.
     - Use the 'get_weather' tool provided by the MCP server.
     - Always provide the current temperature and wind conditions.

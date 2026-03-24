@@ -2,7 +2,7 @@
 import os
 from google.adk.agents import Agent
 from google.adk.tools.toolbox_toolset import ToolboxToolset
-from ..constants import DEFAULT_MODEL
+from agents.constants import DEFAULT_MODEL
 
 # Toolbox URL should point to the MCP Toolbox server
 TOOLBOX_URL = os.environ.get("TOOLBOX_URL", "http://127.0.0.1:5000")
