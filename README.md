@@ -81,18 +81,14 @@ make seed-spanner  # Seed Spanner Graph
 ### 3. Choose Your Execution Path
 
 #### Option A: Local Development
-Run the full A2A stack or individual agents.
+Run the consolidated AI stack.
 - **Master Orchestrator (A2A)**:
   - Terminal 1: `make run-toolbox` (Middleware for SQL)
-  - Terminal 2: `make run-a2a` (Orchestrator that calls all other agents)
-- **Specialized Agents**:
-  - `make run-jobs` (Jobs Agent only)
-  - `make run-spanner` (Spanner Graph Agent only)
-  - `make run-currency` (Currency Agent only)
-- **Web UI**: `make serve-agents` (Interact with all agents at http://localhost:8000)
+  - Terminal 2: `make run-a2a` (Orchestrator that coordinates Jobs, Spanner, Currency, and Weather)
+- **Web UI**: `make serve-agents` (Interact with all agents via a visual interface at http://localhost:8000)
 
 #### Option B: Cloud Deployment (Cloud Run)
-Deploy the stack to Google Cloud.
+Deploy the consolidated stack to Google Cloud. The orchestrator is deployed as the primary entry point.
 ```bash
 make deploy-toolbox
 make deploy-agent

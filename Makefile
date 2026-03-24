@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-jobs run-spanner run-currency run-a2a run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: install setup install-precommit lint activate shell run-a2a run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -100,7 +100,7 @@ deploy-toolbox: check-gcloud
 		--allow-unauthenticated
 
 deploy-agent: check-gcloud
-	@echo "Deploying ADK Agents to Cloud Run..."
+	@echo "Deploying ADK Agent Orchestrator to Cloud Run..."
 	@set -a && . ./.env && set +a; \
 	cp python/pyproject.toml python/uv.lock deploy/agent/; \
 	cp -r python/agents deploy/agent/; \
@@ -109,7 +109,7 @@ deploy-agent: check-gcloud
 		--source deploy/agent/ \
 		--region $$REGION \
 		--project $$GOOGLE_CLOUD_PROJECT \
-		--set-env-vars TOOLBOX_URL=$$TOOLBOX_URL,GOOGLE_CLOUD_PROJECT=$$GOOGLE_CLOUD_PROJECT,REGION=$$REGION \
+		--set-env-vars TOOLBOX_URL=$$TOOLBOX_URL,GOOGLE_CLOUD_PROJECT=$$GOOGLE_CLOUD_PROJECT,REGION=$$REGION,ADK_AGENT=agents/orchestrator \
 		--allow-unauthenticated
 
 # Run MCP Toolbox
@@ -164,30 +164,9 @@ add-dep:
 		cd python && uv add $(PKG); \
 	fi
 
-run-single:
-	@$(MAKE) run-agent NAME=single_tool_agent
-
-run-multi:
-	@$(MAKE) run-agent NAME=multi_tool_agent
-
-run-multimodal:
-	@$(MAKE) run-agent NAME=multimodal_agent
-
-run-jobs:
-	@$(MAKE) run-agent NAME=jobs
-
-run-spanner:
-	@$(MAKE) run-agent NAME=spanner
-
 run-currency-mcp:
 	@echo "Running Currency MCP Server..."
 	cd python && uv run python mcp_servers/currency/server.py
-
-run-currency:
-	@$(MAKE) run-agent NAME=currency
-
-run-weather:
-	@$(MAKE) run-agent NAME=weather
 
 run-a2a:
 	@$(MAKE) run-agent NAME=orchestrator
