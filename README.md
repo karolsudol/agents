@@ -85,7 +85,7 @@ Run the full A2A stack or individual agents.
   - Terminal 1: `make run-toolbox` (Middleware for SQL)
   - Terminal 2: `make run-a2a` (Orchestrator that calls all other agents)
 - **Specialized Agents**:
-  - `make run-rag` (Jobs/SQL Agent only)
+  - `make run-jobs` (Jobs Agent only)
   - `make run-spanner` (Spanner Graph Agent only)
   - `make run-currency` (Currency Agent only)
 - **Web UI**: `make serve-agents` (Interact with all agents at http://localhost:8000)

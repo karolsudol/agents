@@ -3,6 +3,7 @@ from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams
 import google.auth
 import google.auth.transport.requests
+from ..constants import DEFAULT_MODEL
 
 # Spanner MCP Configuration
 SPANNER_MCP_URL = "https://spanner.googleapis.com/mcp"
@@ -22,7 +23,6 @@ def get_google_auth_headers():
 
 
 # Initialize the Spanner MCP Toolset
-# Note: SseConnectionParams expects headers for the initial connection
 spanner_toolset = McpToolset(
     connection_params=SseConnectionParams(
         url=SPANNER_MCP_URL, headers=get_google_auth_headers()
@@ -31,7 +31,7 @@ spanner_toolset = McpToolset(
 
 root_agent = Agent(
     name="spanner_graph_agent",
-    model="gemini-1.5-flash",
+    model=DEFAULT_MODEL,
     description="An agent specialized in financial fraud detection using Spanner Property Graphs.",
     instruction="""You are a Fraud Detection Expert. You have access to a Cloud Spanner database with a financial property graph (FinGraph).
     Your task is to:

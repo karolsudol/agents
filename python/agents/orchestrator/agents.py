@@ -1,16 +1,14 @@
 from google.adk.agents import Agent
-from ..agent_toolbox_mcp.agent import root_agent as jobs_agent
-from ..agent_spanner_mcp.agent import root_agent as spanner_graph_agent
-from ..agent_currency.agent import root_agent as currency_agent
+from ..jobs.agent import root_agent as jobs_agent
+from ..spanner.agent import root_agent as spanner_graph_agent
+from ..currency.agent import root_agent as currency_agent
 from .tools import say_hello, say_goodbye, get_weather
-
-# Model Constant
-MODEL_GEMINI_2_5_FLASH = "gemini-2.5-flash"
+from ..constants import DEFAULT_MODEL
 
 # ROOT AGENT: The Master Orchestrator (A2A)
 team_orchestrator = Agent(
     name="team_orchestrator",
-    model=MODEL_GEMINI_2_5_FLASH,
+    model=DEFAULT_MODEL,
     description="The central entry point for all agent services. Orchestrates specialized agents for jobs, finance, and currency.",
     instruction="""You are the Master Orchestrator of a team of specialized AI agents.
 Your goal is to delegate user requests to the most appropriate specialist:

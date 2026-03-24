@@ -2,6 +2,7 @@ from google.adk.agents import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
+from ..constants import DEFAULT_MODEL
 import os
 
 # Define the path to the currency MCP server
@@ -22,7 +23,7 @@ currency_toolset = McpToolset(
 
 root_agent = Agent(
     name="currency_agent",
-    model="gemini-1.5-flash",
+    model=DEFAULT_MODEL,
     description="An agent specialized in currency conversion and financial exchange rates.",
     instruction="""You are a Currency Expert. You help users convert amounts between different currencies.
     - Use the 'convert_currency' tool to perform accurate conversions.

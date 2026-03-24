@@ -1,11 +1,11 @@
-.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-rag run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: install setup install-precommit lint activate shell run-single run-multi run-multimodal run-jobs run-spanner run-currency run-a2a run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
 
 UV := $(shell command -v uv 2> /dev/null)
 
 install-uv:
 ifndef UV
 	@echo "Installing uv..."
-	curl -LsSf https://astral.sh/uv/install.sh | sh
+	curl -LsSf https://astral.sh/uv/install.sh | ph
 else
 	@echo "uv is already installed."
 endif
@@ -173,28 +173,28 @@ run-multi:
 run-multimodal:
 	@$(MAKE) run-agent NAME=multimodal_agent
 
-run-rag:
-	@$(MAKE) run-agent NAME=agent_toolbox_mcp
+run-jobs:
+	@$(MAKE) run-agent NAME=jobs
 
 run-spanner:
-	@$(MAKE) run-agent NAME=agent_spanner_mcp
+	@$(MAKE) run-agent NAME=spanner
 
 run-currency-mcp:
 	@echo "Running Currency MCP Server..."
 	cd python && uv run python mcp_servers/currency/server.py
 
 run-currency:
-	@$(MAKE) run-agent NAME=agent_currency
+	@$(MAKE) run-agent NAME=currency
 
 run-a2a:
-	@$(MAKE) run-agent NAME=agent_team
+	@$(MAKE) run-agent NAME=orchestrator
 
 run-team-api:
-	@echo "Starting the Agent Team FastAPI server..."
-	cd python && uv run uvicorn agents.agent_team.main:app --host 0.0.0.0 --port 8000 --reload
+	@echo "Starting the Agent Orchestrator FastAPI server..."
+	cd python && uv run uvicorn agents.orchestrator.main:app --host 0.0.0.0 --port 8000 --reload
 
 test-team-api:
-	@echo "Testing the Agent Team API..."
+	@echo "Testing the Agent Orchestrator API..."
 	curl -X POST "http://localhost:8000/chat" \
 		 -H "Content-Type: application/json" \
 		 -d '{"user_id": "test_user", "session_id": "test_session", "message": "Hi, I am Karol! What is the weather in Tokyo?", "temp_unit": "Celsius"}'
