@@ -66,8 +66,9 @@ This system follows a 5-layer model with **Zero-Trust Governance**, **Agentic RA
 ## 🚀 Getting Started
 
 ### 1. Setup & Environment
+Install required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
 ```bash
-make setup             # Install binaries (uv, terraform, toolbox)
+make setup
 make help              # See all available automation commands
 ```
 
@@ -80,9 +81,10 @@ cp .env.example .env
 - `GOOGLE_API_KEY`: Your Gemini API key from [Google AI Studio](https://aistudio.google.com/).
 - `GOOGLE_CLOUD_PROJECT`: Your GCP Project ID.
 - `REGION`: Your GCP region (e.g., `us-central1`).
-- `DB_PASSWORD`: Set this **after** running `make infra-apply` using the value from Terraform output.
+- `DB_PASSWORD`: Set this **after** running `make infra-apply` (or use `make sync-env`).
 
 ### 2. Infrastructure & Database
+Provision GCP resources, sync credentials, and seed the databases.
 ```bash
 make infra-init        # Initialize Terraform providers
 make infra-apply       # Provision GCP resources
@@ -95,27 +97,49 @@ make seed-spanner      # Seed Spanner Graph
 
 ## 🚀 Execution Paths
 
-### Local Monolith (Standard)
+### 1. Visual Web Portal (Recommended)
+Interact with the Corporate Hub using a visual chat interface.
 ```bash
-make run-toolbox  # Start SQL Middleware
-make run-a2a      # Start Hub with Persistent Memory
+make serve-agents      # Open http://localhost:8000
 ```
 
-### Remote A2A (Enterprise/Cloud Run Simulation)
+### 2. Local Monolith (CLI Mode)
+Run everything in a single process with persistent memory.
 ```bash
-make run-jobs-service  # Start HR Service (Port 8001)
-make run-a2a-remote    # Start Orchestrator in Network Discovery Mode
+make run-toolbox       # Terminal 1 (Required for SQL)
+make run-a2a           # Terminal 2
+```
+
+### 3. Ephemeral Mode (Privacy-First)
+Run without disk persistence. Memory is wiped on exit.
+```bash
+make run-a2a-ephemeral
+```
+
+### 4. Remote A2A (Enterprise Simulation)
+Decouple the Jobs Agent into a standalone service.
+```bash
+make run-jobs-service  # Terminal 2 (Port 8001)
+make run-a2a-remote    # Terminal 3 (Discovery Mode)
 ```
 
 ---
 
-## 💰 Cost Management
-Cloud SQL and Spanner can be expensive. You can "pause" the Cloud SQL instance when not in use:
-- **Pause Instance**: `make infra-stop`
-- **Resume Instance**: `make infra-start`
+## 💡 Pro Tips
 
-## 🧹 Cleanup
-To delete all GCP resources (Cloud SQL, Spanner, etc.) and clean up local artifacts:
-```bash
-make infra-destroy
-```
+### 🛠️ Handling Experimental Warnings
+When running agents, you may see `[EXPERIMENTAL]` warnings from the Google ADK library. These are expected as certain ADK features (like the Credential Service) are under active development. They do not affect functionality.
+
+### 💰 Cost Management
+Cloud SQL and Spanner can be expensive. Use these commands to pause/resume your infra:
+- **Pause Everything**: `make infra-stop` (Pauses SQL + Scales down Spanner)
+- **Resume Everything**: `make infra-start`
+
+---
+
+## 📂 Project Structure
+- `python/agents/orchestrator/`: Hub Orchestrator & Global Governance.
+- `python/agents/finance/`: Hierarchical domain with Looping Risk Analyst.
+- `python/agents/jobs/`: HR specialist with Agentic RAG and Domain Governance.
+- `python/mcp_servers/`: Standalone MCP servers wrapping external REST APIs.
+- `infra/`: Terraform for Cloud SQL (pgvector) and Spanner Graph resources.

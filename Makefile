@@ -247,7 +247,7 @@ test-team-api:
 
 serve-agents:
 	@echo "Serving the agents web interface on port 8000..."
-	cd python && uv run --env-file ../.env adk web agents --port 8000
+	cd python && PYTHONPATH=agents uv run --env-file ../.env adk web agents --port 8000
 
 lint:
 	cd python && uv run ruff check . --fix
