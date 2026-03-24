@@ -23,14 +23,14 @@ This repository demonstrates how specialized AI Agents connect to diverse data s
                (A2A)  |       (A2A)  |       (A2A)  |       (A2A) |                  |
        +--------------v--+   +-------v-------+   +--v-----------+ +--v-----------+   |
        |    JOBS AGENT   |   |  SPANNER AGT  |   | CURRENCY AGT | | WEATHER AGT  |   |
-       |  (Agentic RAG)  |   | (SpannerGraph)|   | (Custom MCP) | | (Mock Data)  |   |
-       +-------+---------+   +-------+-------+   +------+-------+ +--------------+   |
-               |                     |                  |                            |
-               |                     |                  |                            |
-        +------v-------+             |           +------v-------+                    |
-        | MCP TOOLBOX  |             |           |  CUSTOM MCP  |                    |
-        | (Middleware) |             |           |   (Server)   |                    |
-        +------+-------+             |           +--------------+                    |
+       |  (Agentic RAG)  |   | (SpannerGraph)|   | (Custom MCP) | | (Custom MCP) |   |
+       +-------+---------+   +-------+-------+   +------+-------+ +------+-------+   |
+               |                     |                  |                |           |
+               |                     |                  |                |           |
+        +------v-------+             |           +------v-------+ +------v-------+   |
+        | MCP TOOLBOX  |             |           |  CUSTOM MCP  | |  CUSTOM MCP  |   |
+        | (Middleware) |             |           |  (Currency)  | |  (Weather)   |   |
+        +------+-------+             |           +--------------+ +--------------+   |
                |                     |                                               |
   +------------+----------+          +--------------+-----------+                    |
   |                       |                         |           |                    |
@@ -51,7 +51,7 @@ There are three patterns used in this project:
 
 1.  **Middleware Pattern (Cloud SQL)**: Standard databases like PostgreSQL don't speak MCP. We run the **MCP Toolbox** as a standalone server. It acts as a translator: Agent ↔ MCP Toolbox ↔ Cloud SQL.
 2.  **Native Pattern (Spanner)**: Cloud Spanner has **built-in MCP support**. It provides a native endpoint (`/mcp`) that Google manages for you. The Agent talks directly to the database service without needing any extra middleware or "toolbox" binary.
-3.  **Custom Server Pattern (Currency)**: We built a custom Python-based MCP server that provides specialized financial tools. The Agent connects via Stdio or SSE.
+3.  **Custom Server Pattern (Currency/Weather)**: We built custom Python-based MCP servers that provide specialized tools (Currency conversion and Real-time Weather via REST API). These agents connect via Stdio.
 
 ---
 
@@ -110,6 +110,7 @@ make infra-destroy
 - `sql/`: SQL scripts for database initialization and seeding (`cloud_sql_seed.sql`, `spanner_seed.sql`).
 - `tools.yaml`: Configuration for the MCP Toolbox bridge (Cloud SQL only).
 - `python/agents/`: Individual AI agent implementations.
+- `python/mcp_servers/`: Standalone MCP server implementations (Currency, Weather).
 - `deploy/`: Dockerfiles and manifests for Cloud Run deployment.
 
 ---
