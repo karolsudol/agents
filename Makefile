@@ -1,6 +1,37 @@
-.PHONY: install setup install-precommit lint activate shell run-a2a run-a2a-remote run-a2a-ephemeral run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: help install setup install-precommit lint activate shell run-a2a run-a2a-remote run-a2a-ephemeral run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
 
 UV := $(shell command -v uv 2> /dev/null)
+
+help:
+	@echo "🏢 Corporate AI Hub - Available Commands:"
+	@echo ""
+	@echo "🔧 Setup & Environment:"
+	@echo "  make setup             - Install all binaries (uv, terraform, toolbox) and sync Python"
+	@echo "  make lint              - Run ruff, mypy, and pyright checks"
+	@echo ""
+	@echo "🏗️ Infrastructure (Terraform):"
+	@echo "  make infra-init        - Initialize Terraform"
+	@echo "  make infra-apply       - Deploy GCP resources (Cloud SQL, Spanner)"
+	@echo "  make infra-destroy     - Teardown all GCP resources"
+	@echo "  make seed-db           - Seed Cloud SQL with jobs data"
+	@echo "  make seed-spanner      - Seed Spanner with finance graph data"
+	@echo ""
+	@echo "🚀 Execution (Local Monolith):"
+	@echo "  make run-toolbox       - Start MCP Toolbox (Middleware for SQL)"
+	@echo "  make run-a2a           - Run Corporate Hub (Persistent Memory)"
+	@echo "  make run-a2a-ephemeral - Run Corporate Hub (Short-term memory only)"
+	@echo ""
+	@echo "🌐 Execution (Remote A2A Services):"
+	@echo "  make run-jobs-service  - Start Jobs Domain as a standalone service (Port 8001)"
+	@echo "  make run-a2a-remote    - Run Orchestrator in Remote Discovery mode"
+	@echo ""
+	@echo "🖥️ UI & API:"
+	@echo "  make serve-agents      - Start Web UI at http://localhost:8000"
+	@echo "  make run-team-api      - Start Orchestrator as a FastAPI REST server"
+	@echo ""
+	@echo "☁️ Deployment (Cloud Run):"
+	@echo "  make deploy-toolbox    - Deploy MCP Toolbox to Cloud Run"
+	@echo "  make deploy-agent      - Deploy Orchestrator to Cloud Run"
 
 install-uv:
 ifndef UV
