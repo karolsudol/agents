@@ -1,7 +1,9 @@
+from typing import cast, Dict
 from google.adk.agents import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import SseConnectionParams
 import google.auth
+from google.auth.credentials import Credentials
 import google.auth.transport.requests
 from ..constants import DEFAULT_MODEL
 
@@ -9,16 +11,24 @@ from ..constants import DEFAULT_MODEL
 SPANNER_MCP_URL = "https://spanner.googleapis.com/mcp"
 
 
-def get_google_auth_headers():
-    credentials, project = google.auth.default(
+def get_google_auth_headers() -> Dict[str, str]:
+    """Retrieves Google Auth headers for Spanner MCP connection."""
+    # Explicitly cast and type the return of google.auth.default() to satisfy Pyright
+    credentials_info = google.auth.default(
         scopes=[
             "https://www.googleapis.com/auth/spanner.admin",
             "https://www.googleapis.com/auth/spanner.data",
             "https://www.googleapis.com/auth/cloud-platform",
         ]
     )
+    credentials = cast(Credentials, credentials_info[0])
+
     auth_request = google.auth.transport.requests.Request()
     credentials.refresh(auth_request)
+
+    if not credentials.token:
+        return {}
+
     return {"Authorization": f"Bearer {credentials.token}"}
 
 

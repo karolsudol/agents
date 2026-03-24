@@ -186,6 +186,9 @@ run-currency-mcp:
 run-currency:
 	@$(MAKE) run-agent NAME=currency
 
+run-weather:
+	@$(MAKE) run-agent NAME=weather
+
 run-a2a:
 	@$(MAKE) run-agent NAME=orchestrator
 
