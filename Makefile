@@ -1,4 +1,4 @@
-.PHONY: install setup install-precommit lint activate shell run-a2a run-a2a-remote run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
+.PHONY: install setup install-precommit lint activate shell run-a2a run-a2a-remote run-a2a-ephemeral run-jobs-service run-team-api test-team-api serve-agents list-agents run-agent add-dep infra-init infra-apply infra-destroy setup-toolbox run-toolbox setup-terraform check-gcloud setup-sql-proxy deploy-toolbox deploy-agent
 
 UV := $(shell command -v uv 2> /dev/null)
 
@@ -91,7 +91,7 @@ infra-destroy: check-gcloud setup-terraform
 deploy-toolbox: check-gcloud
 	@echo "Deploying MCP Toolbox to Cloud Run..."
 	@set -a && . ./.env && set +a; \
-	cp toolbox tools.yaml deploy/toolbox/; \
+	cp toolbox python/mcp_servers/jobs_db/tools.yaml deploy/toolbox/; \
 	gcloud run deploy mcp-toolbox-service \
 		--source deploy/toolbox/ \
 		--region $$REGION \
@@ -116,14 +116,14 @@ deploy-agent: check-gcloud
 run-toolbox: setup-toolbox
 	@echo "Running MCP Toolbox..."
 	@set -a && . ./.env && set +a; \
-	./toolbox --tools-file tools.yaml
+	./toolbox --tools-file python/mcp_servers/jobs_db/tools.yaml
 
 # Seed Database
 seed-db: check-gcloud setup-sql-proxy
 	@echo "Seeding the database..."
 	@# Source the .env file to get DB_PASSWORD
 	@set -a && . ./.env && set +a; \
-	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < sql/cloud_sql_seed.sql
+	PGPASSWORD="$$DB_PASSWORD" PATH="$$PATH:$(PWD)" gcloud sql connect jobs-db-instance --user=jobs_user --project=$$GOOGLE_CLOUD_PROJECT --quiet < python/mcp_servers/jobs_db/cloud_sql_seed.sql
 
 # Seed Spanner
 seed-spanner: check-gcloud
@@ -159,7 +159,7 @@ run-agent:
 add-dep:
 	@if [ -z "$(PKG)" ]; then \
 		echo "Usage: make add-dep PKG=package_name"; \
-	else \
+		else \
 		echo "Installing $(PKG) with uv..."; \
 		cd python && uv add $(PKG); \
 	fi
