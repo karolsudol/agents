@@ -71,6 +71,17 @@ make setup             # Install binaries (uv, terraform, toolbox)
 make help              # See all available automation commands
 ```
 
+Create a `.env` file in the root based on `.env.example`:
+```bash
+cp .env.example .env
+```
+
+**Configure the following in `.env`:**
+- `GOOGLE_API_KEY`: Your Gemini API key from [Google AI Studio](https://aistudio.google.com/).
+- `GOOGLE_CLOUD_PROJECT`: Your GCP Project ID.
+- `REGION`: Your GCP region (e.g., `us-central1`).
+- `DB_PASSWORD`: Set this **after** running `make infra-apply` using the value from Terraform output.
+
 ### 2. Infrastructure & Database
 ```bash
 make infra-init        # Initialize Terraform providers

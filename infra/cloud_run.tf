@@ -3,6 +3,7 @@ resource "google_cloud_run_v2_service" "toolbox" {
   name     = "mcp-toolbox-service"
   location = var.region
   project  = var.project_id
+  deletion_protection = false
 
   template {
     service_account = google_service_account.toolbox_sa.email
@@ -40,6 +41,7 @@ resource "google_cloud_run_v2_service" "agents" {
   name     = "adk-agents-service"
   location = var.region
   project  = var.project_id
+  deletion_protection = false
 
   template {
     service_account = google_service_account.agent_sa.email
