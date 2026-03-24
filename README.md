@@ -4,89 +4,80 @@
 
 A collection of AI agents built with the **Agent Development Kit (ADK)**, the **Model Context Protocol (MCP)**, and **Retrieval-Augmented Generation (RAG)**.
 
-## 🏗️ Architecture Overview
+## 🏗️ Agentverse Architecture
 
-This repository demonstrates how specialized AI Agents connect to diverse data sources and collaborate via **Agent-to-Agent (A2A)** orchestration.
+Following the **Agentverse** model, this repository is structured into distinct layers of responsibility: **Orchestration**, **Domain Workflows**, and **Managed Tools**.
 
 ```text
-                             +--------------------------+
-                             |          USER            |
-                             +------------+-------------+
-                                          |
-                                          | (Natural Language)
-                                          |
-                  +-----------------------v-----------------------+      +-----------------------+
-                  |            TEAM ORCHESTRATOR                  |      |      ANY LLM          |
-                  |             (Master Agent)                    <------> (Gemini, Claude, etc) |
-                  +---+--------------+--------------+-------------+      +-----------+-----------+
-                      |              |              |             |                  |
-               (A2A)  |       (A2A)  |       (A2A)  |       (A2A) |                  |
-       +--------------v--+   +-------v-------+   +--v-----------+ +--v-----------+   |
-       |    JOBS AGENT   |   |  SPANNER AGT  |   | CURRENCY AGT | | WEATHER AGT  |   |
-       |  (Agentic RAG)  |   | (SpannerGraph)|   | (Custom MCP) | | (Custom MCP) |   |
-       +-------+---------+   +-------+-------+   +------+-------+ +------+-------+   |
-               |                     |                  |                |           |
-               |                     |                  |                |           |
-        +------v-------+             |           +------v-------+ +------v-------+   |
-        | MCP TOOLBOX  |             |           |  CUSTOM MCP  | |  CUSTOM MCP  |   |
-        | (Middleware) |             |           |  (Currency)  | |  (Weather)   |   |
-        +------+-------+             |           +--------------+ +--------------+   |
-               |                     |                                               |
-  +------------+----------+          +--------------+-----------+                    |
-  |                       |                         |           |                    |
-+-v---------+ +-----------v--+                +-----v--------+  |                    |
-| CLOUD SQL | |  VERTEX AI   |                |   SPANNER    |  |                    |
-| (Postgre) | | (Embeddings) |                | (Native MCP) |  |                    |
-+-----------+ +--------------+                +--------------+  |                    |
-      ^              ^                               ^          |                    |
-      |              |                               |          |                    |
-      +--------------+---------------+---------------+----------+--------------------+
-                                     |
-                           (GCP Infrastructure)
+                                +---------------------------+
+                                |      USER INTERFACE       |
+                                +-------------+-------------+
+                                              |
+                                              | (Natural Language)
+                                              |
++---------------------------------------------v-----------------------------------------------+
+|                                     ORCHESTRATION LAYER                                     |
+|                                    (Master Orchestrator)                                    |
++------+----------------------+---------------+-----------------------+-----------------------+
+       |                      |               |                       |                       |
+       | (State/Memory)       | (A2A)         | (A2A)                 | (A2A)                 | (A2A)
++------v--------------+  +----v----------+ +--v-----------+  +--------v-------+  +------------v---+
+|   SESSION MEMORY    |  |  JOBS DOMAIN  | | FINANCE DOMAIN |  | CURRENCY DOMAIN|  | WEATHER DOMAIN |
+| (InMemory/Database) |  | (Agentic RAG) | | (Graph/Spanner)|  |  (Custom MCP)  |  |  (Custom MCP)  |
++---------------------+  +-------+-------+ +------+-------+  +--------+-------+  +-------+--------+
+                                 |                |                   |                  |
++--------------------------------v----------------v-------------------v------------------v-------+
+|                                    MANAGED TOOLING (MCP)                                    |
++----------------------+----------------------+------------------------+-----------------------+
+|     MCP TOOLBOX      |    SPANNER NATIVE    |      CUSTOM MCP        |      CUSTOM MCP       |
+|    (Cloud SQL)       |     (Endpoints)      |      (Currency)        |       (Weather)       |
++----------+-----------+----------+-----------+-----------+------------+-----------+-----------+
+           |                      |                       |                        |
++----------v----------+  +--------v-------+      +--------v-------+       +--------v-------+
+|      CLOUD SQL      |  |     SPANNER    |      |    EXTERNAL    |       |    OPEN-METEO   |
+|     (PostgreSQL)    |  |  (PropertyGraph)|      |   EXCHANGE     |       |    REST API     |
++---------------------+  +----------------+      +----------------+       +----------------+
+           |                      |                       |                        |
+           +----------------------+-----------+-----------+------------------------+
+                                              |
+                                    (GCP Infrastructure)
 ```
 
-## 🧠 Why is Spanner different from Cloud SQL?
+## 🔍 Architecture Layers
 
-There are three patterns used in this project:
-
-1.  **Middleware Pattern (Cloud SQL)**: Standard databases like PostgreSQL don't speak MCP. We run the **MCP Toolbox** as a standalone server. It acts as a translator: Agent ↔ MCP Toolbox ↔ Cloud SQL.
-2.  **Native Pattern (Spanner)**: Cloud Spanner has **built-in MCP support**. It provides a native endpoint (`/mcp`) that Google manages for you. The Agent talks directly to the database service without needing any extra middleware or "toolbox" binary.
-3.  **Custom Server Pattern (Currency/Weather)**: We built custom Python-based MCP servers that provide specialized tools (Currency conversion and Real-time Weather via REST API). These agents connect via Stdio.
+1.  **Orchestration Layer**: The "Brain" that manages the conversation flow. It uses **Agent-to-Agent (A2A)** calls to delegate to specialized domains.
+2.  **Domain Workflows**: Specialist agents (Jobs, Spanner, Currency, Weather) that have deep knowledge of their specific domain and available tools.
+3.  **Managed Tooling (MCP)**: The standardized communication layer. Whether it's a native Google service or a custom REST wrapper, everything speaks MCP.
+4.  **Session Memory**: Manages state across turns, ensuring the Orchestrator remembers user preferences (like temperature units or job interests).
 
 ---
 
 ## 🚀 Getting Started
-
-All commands must be run from the **project root directory**.
 
 ### 1. Setup & Environment
 Install required binaries (`uv`, `terraform`, `toolbox`, `cloud-sql-proxy`) and sync Python dependencies.
 ```bash
 make setup
 ```
-Create a `.env` file in the root based on `.env.example` and set your `GOOGLE_CLOUD_PROJECT`.
 
 ### 2. Infrastructure & Database
 Provision GCP resources and seed the databases.
 ```bash
 make infra-init
 make infra-apply
-# Update .env DB_PASSWORD with the terraform output
 make seed-db       # Seed Cloud SQL
 make seed-spanner  # Seed Spanner Graph
 ```
 
-### 3. Choose Your Execution Path
+### 3. Execution
 
-#### Option A: Local Development
-Run the consolidated AI stack.
+#### Local Development
 - **Master Orchestrator (A2A)**:
   - Terminal 1: `make run-toolbox` (Middleware for SQL)
-  - Terminal 2: `make run-a2a` (Orchestrator that coordinates Jobs, Spanner, Currency, and Weather)
-- **Web UI**: `make serve-agents` (Interact with all agents via a visual interface at http://localhost:8000)
+  - Terminal 2: `make run-a2a` (Orchestrator that coordinates all domains)
+- **Web UI**: `make serve-agents` (Visual interface at http://localhost:8000)
 
-#### Option B: Cloud Deployment (Cloud Run)
-Deploy the consolidated stack to Google Cloud. The orchestrator is deployed as the primary entry point.
+#### Cloud Deployment
 ```bash
 make deploy-toolbox
 make deploy-agent
@@ -94,24 +85,8 @@ make deploy-agent
 
 ---
 
-## 💰 Cost Management
-Cloud SQL and Spanner can be expensive. You can "pause" the Cloud SQL instance when not in use:
-- **Pause Instance**: `make infra-stop`
-- **Resume Instance**: `make infra-start`
-
-## 🧹 Cleanup
-To delete all GCP resources (Cloud SQL, Spanner, etc.) and clean up local artifacts:
-```bash
-make infra-destroy
-```
-
 ## 📂 Project Structure
-- `infra/`: Terraform configuration for GCP resources.
-- `sql/`: SQL scripts for database initialization and seeding (`cloud_sql_seed.sql`, `spanner_seed.sql`).
-- `tools.yaml`: Configuration for the MCP Toolbox bridge (Cloud SQL only).
-- `python/agents/`: Individual AI agent implementations.
-- `python/mcp_servers/`: Standalone MCP server implementations (Currency, Weather).
-- `deploy/`: Dockerfiles and manifests for Cloud Run deployment.
-
----
-*For detailed setup of specific agents (e.g. GCP Auth or API endpoints), refer to the READMEs in `python/agents/`.*
+- `python/agents/orchestrator/`: Master coordinator (The "Brain").
+- `python/agents/[domain]/`: Specialist domain agents (Jobs, Spanner, etc.).
+- `python/mcp_servers/`: Custom MCP implementations for REST APIs and logic.
+- `infra/`: Terraform for all GCP resources.
