@@ -169,8 +169,12 @@ run-currency-mcp:
 	cd python && uv run python mcp_servers/currency/server.py
 
 run-a2a:
-	@echo "Running Corporate Hub in LOCAL Monolith Mode..."
+	@echo "Running Corporate Hub in LOCAL Monolith Mode (Persistent Memory)..."
 	@$(MAKE) run-agent NAME=orchestrator
+
+run-a2a-ephemeral:
+	@echo "Running Corporate Hub in EPHEMERAL Mode (Short-term memory only)..."
+	cd python && PERSISTENT_MEMORY=false uv run --env-file ../.env adk run agents/orchestrator
 
 # REMOTE A2A Path
 run-jobs-service:
