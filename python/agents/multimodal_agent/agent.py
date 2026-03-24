@@ -1,6 +1,7 @@
 import datetime
 import pytz
 from google.adk.agents.llm_agent import Agent
+from ..constants import DEFAULT_MODEL
 
 
 def get_weather(city: str) -> dict[str, str]:
@@ -58,7 +59,7 @@ def describe_audio(audio_info: str) -> dict[str, str]:
 
 
 root_agent = Agent(
-    model="gemini-2.0-flash-live-001",
+    model=DEFAULT_MODEL,
     name="multimodal_multi_tool_agent",
     description="A powerful multimodal agent that can analyze audio, tell the time, and check the weather.",
     instruction=(
