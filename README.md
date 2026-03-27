@@ -48,9 +48,13 @@ This system follows a modular architecture where a **Core Coordinator** manages 
 ## 🧠 Protocol Capabilities
 
 1.  **Identity (OWS/AP2)**: Every agent has a cryptographic wallet managed via the **OpenWallet SDK**. Actions are signed using decentralized identities (DIDs).
-2.  **Commerce (Solana x402)**: Implements `HTTP 402` for agent-to-agent transactions. The Payments Hub settles micropayments for API resources on Solana.
-3.  **Discovery (A2A / Agent Cards)**: Agents expose a `/.well-known/agent-card.json` for dynamic discovery. The Core Coordinator uses this to route requests without hardcoding.
-4.  **Interface (A2UI)**: Structured UI streaming. Agents send interactive cards (Forms, Charts, Approvals) instead of just raw text.
+2.  **Commerce (Solana x402 / UCP)**:
+    *   **x402**: Implements `HTTP 402` for agent-to-agent transactions.
+    *   **UCP**: Standardized shopping lifecycle (Quotes/Orders) with unified schemas for multi-vendor procurement.
+3.  **Discovery (A2A / Agent Cards)**: Agents expose a `/.well-known/agent-card.json` for dynamic discovery.
+4.  **Interface (A2UI / AG-UI)**:
+    *   **A2UI**: Structured interactive widgets (Charts, Forms).
+    *   **AG-UI**: Standardized SSE streaming middleware for text and tool events.
 5.  **Agentic RAG**: Decoupled HR Hub uses **Vertex AI Embeddings** and **pgvector** for domain-specific knowledge retrieval.
 
 ---
