@@ -1,0 +1,14 @@
+{
+  "name": "Core Coordinator",
+  "description": "The central orchestration hub for multi-agent workflows.",
+  "protocols": ["a2a", "mcp", "a2ui", "ows", "x402"],
+  "endpoints": {
+    "a2a": "/v1/a2a",
+    "mcp": "/v1/mcp"
+  },
+  "capabilities": [
+    "global-governance",
+    "agent-discovery",
+    "payment-settlement"
+  ]
+}
