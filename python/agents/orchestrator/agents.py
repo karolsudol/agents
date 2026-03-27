@@ -5,7 +5,7 @@ from google.adk.agents import Agent, BaseAgent
 # Use direct imports (will work if PYTHONPATH includes the agents/ directory)
 from finance.agent import root_agent as finance_director
 from weather.agent import root_agent as logistics_agent
-from orchestrator.tools import say_hello, say_goodbye
+from orchestrator.tools import say_hello, say_goodbye, render_ui
 from orchestrator.plugins import CoolDownPlugin
 from constants import DEFAULT_MODEL
 
@@ -64,8 +64,12 @@ team_orchestrator = Agent(
        - SHORT-TERM: Use session state to track context.
        - LONG-TERM: Reference the persistent store for past interactions.
 
+    4. A2UI (AGENT-TO-USER INTERFACE):
+       - For complex visualizations, financial charts, or formal approvals, use the 'render_ui' tool.
+       - This provides structured widgets to the user instead of raw text.
+
     Synthesize all results into a professional corporate briefing.""",
-    tools=[say_hello, say_goodbye],
+    tools=[say_hello, say_goodbye, render_ui],
     sub_agents=sub_agents,
     before_agent_callback=cooldown_governor.before_agent_callback,
 )
