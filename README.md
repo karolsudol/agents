@@ -33,22 +33,30 @@ This system uses a **Core Coordinator** to manage specialized hubs for **Payment
                  |                                                                                  |
  +---------------+---------------+                                                  +---------------+---------------+
  |      🛡️ IDENTITY (OWS)        |                                                  |    🌐 REMOTE A2A (ADK)        |
- | (Self-Sovereign Identity)     |                                                  |   (Service Discovery)         |
+ | (Self-Sovereign Identity)     |                                                  |   (Discovery / Cards)         |
  +---------------+---------------+                                                  +---------------+---------------+
- |      💰 COMMERCE (x402)       |                                                  |    🧠 AGENTIC RAG             |
+ |      💰 COMMERCE (x402 / UCP) |                                                  |    🧠 AGENTIC RAG             |
  | (Solana Micropayments)        |                                                  |   (Cloud SQL / pgvector)      |
  +---------------+---------------+                                                  +---------------+---------------+
                  |                                                                                  |
- +--------------------------------------------------------------------------------------------------+---------------+
- |                                         MANAGED TOOLING (MCP)                                                    |
- +--------------------------+--------------------------+---------------------------+-----------------------------------+
- |       MCP TOOLBOX        |      SPANNER NATIVE      |        CUSTOM MCP         |            CUSTOM MCP             |
- |      (Cloud SQL DB)      |       (Endpoints)        |        (Currency)         |             (Weather)             |
- +------------+-------------+------------+-------------+-------------+-------------+-------------+---------------------+
+        (Settlement / USDC)                                                                  (Remote Discovery)
+                 |                                                                                  |
+    +------------v-------------+                                                       +------------v-------------+
+    |     SOLANA MAINNET       |                                                       |    REMOTE AGENT NODE     |
+    |   (Blockchain Layer)     |                                                       |    (Cloud Run Service)   |
+    +--------------------------+                                                       +------------+-------------+
+                                                                                                    |
+                                                                                                    |
++---------------------------------------------------------------------------------------------------v----------------+
+|                                         MANAGED TOOLING (MCP)                                                    |
++--------------------------+--------------------------+---------------------------+-----------------------------------+
+|       MCP TOOLBOX        |      SPANNER NATIVE      |        CUSTOM MCP         |            CUSTOM MCP             |
+|      (Cloud SQL DB)      |       (Endpoints)        |      (UCP Suppliers)       |             (Weather)             |
++------------+-------------+------------+-------------+-------------+-------------+-------------+---------------------+
              |                          |                           |                           |
     +--------v---------+       +--------v---------+        +--------v---------+        +--------v---------+
     |    CLOUD SQL     |       |     SPANNER      |        |     EXTERNAL     |        |    OPEN-METEO    |
-    | (pgvector / RAG) |       | (Property Graph) |        |     EXCHANGE     |        |     REST API     |
+    | (pgvector / RAG) |       | (Property Graph) |        |     SUPPLIERS    |        |     REST API     |
     +------------------+       +------------------+        +------------------+        +------------------+
 ```
 
