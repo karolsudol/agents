@@ -1,0 +1,13 @@
+{
+  "name": "HR Director",
+  "description": "Specialized agent for recruitment, employee management, and RAG-based job search.",
+  "protocols": ["a2a", "mcp"],
+  "endpoints": {
+    "a2a": "http://localhost:8001/v1/a2a"
+  },
+  "capabilities": [
+    "agentic-rag",
+    "job-matching",
+    "resume-analysis"
+  ]
+}

@@ -19,6 +19,7 @@ dependencies = [
     { name = "litellm" },
     { name = "mcp" },
     { name = "mypy" },
+    { name = "open-wallet-standard" },
     { name = "pre-commit" },
     { name = "pyright" },
     { name = "python-dotenv" },
@@ -38,6 +39,7 @@ requires-dist = [
     { name = "litellm", specifier = ">=1.82.6" },
     { name = "mcp", specifier = ">=1.26.0" },
     { name = "mypy", specifier = ">=1.19.1" },
+    { name = "open-wallet-standard", specifier = ">=1.1.2" },
     { name = "pre-commit" },
     { name = "pyright", specifier = ">=1.1.408" },
     { name = "python-dotenv", specifier = ">=1.2.2" },
@@ -2424,6 +2426,29 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/0b/5f/19930f824ffeb0ad4372da4812c50edbd1434f678c90c2733e1188edfc63/oauthlib-3.3.1.tar.gz", hash = "sha256:0f0f8aa759826a193cf66c12ea1af1637f87b9b4622d46e866952bb022e538c9", size = 185918 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/be/9c/92789c596b8df838baa98fa71844d84283302f7604ed565dafe5a6b5041a/oauthlib-3.3.1-py3-none-any.whl", hash = "sha256:88119c938d2b8fb88561af5f6ee0eec8cc8d552b7bb1f712743136eb7523b7a1", size = 160065 },
+]
+
+[[package]]
+name = "open-wallet-standard"
+version = "1.1.2"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1f/c2/905ff9c32d6a43ea0623f8abf583f7cb54141ce0c60a0a85d4d263c8b731/open_wallet_standard-1.1.2-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:8393ee3c9dfd5f1be8da84a51dedf7ad0f531abac5ad20ee0d369b2ff00b2a9a", size = 1553225 },
+    { url = "https://files.pythonhosted.org/packages/e1/b2/2f0b8201ce44b5888dc9c0a2fbcf35599af30c210c9a4eb94c686ea1f5c9/open_wallet_standard-1.1.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:8b7b2c9330d5d3d5f97f153a33b973b00cadd202d8152d36ebaf0f699b586905", size = 1496511 },
+    { url = "https://files.pythonhosted.org/packages/dc/f2/29c577808a17e84ba840126c14feaa08d54f22b4ffdc261daadce3a52f3c/open_wallet_standard-1.1.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:66f968eaabdcfa603ef29def1fe0d5531b963a9989d67667df9c200e2a80deb8", size = 1671151 },
+    { url = "https://files.pythonhosted.org/packages/3e/08/ef66abd9873d57147f783f6bed333e9eb036444f6f41228f5c8bac7fbb98/open_wallet_standard-1.1.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8561d1c27a72b0a17fd4ee89cff961d6ebd5205188a37c735638c16deccbcf88", size = 1692402 },
+    { url = "https://files.pythonhosted.org/packages/71/5b/44132ba5128f54f521c95f6a4a87a721e1ce51ace7f297ca71f06e590b12/open_wallet_standard-1.1.2-cp311-cp311-macosx_10_12_x86_64.whl", hash = "sha256:a66ee05488c9a9a16916107bd8fb2352cb0ec68958046ec51529013d71cb9070", size = 1552946 },
+    { url = "https://files.pythonhosted.org/packages/26/73/cc5e8d21b769a2f2179eacbcdfe14889d4ddf9778cdbf10172674f208acd/open_wallet_standard-1.1.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:debf13bc1864f6c27f25972442c1be83b1fdcb11e65c623761adf976093b1a28", size = 1496136 },
+    { url = "https://files.pythonhosted.org/packages/51/a9/5d2f5a6b580b02789d5a3e5ea986edac968d6d1a2d888d0af333db58447e/open_wallet_standard-1.1.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1cc5732b0c55f3542a57e7a72e70e2b1d4cc0181c8f8d93f1a45f8ac3e943c25", size = 1670792 },
+    { url = "https://files.pythonhosted.org/packages/7b/71/fc81ed4f478de04648af64cf7d33edd8c1d876e4070f77fcf455e7052f6e/open_wallet_standard-1.1.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:4ffce2bf979df5dfaac8508e29b5161c72f5358c13368eaee9c186f947797265", size = 1692256 },
+    { url = "https://files.pythonhosted.org/packages/61/74/4a171ed37c2d864f2e45ec6953f08682e91d5103f31222078d111b965321/open_wallet_standard-1.1.2-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:937ad5c3e9d2fe8cf8756da98cb0bb6f1e8aacb1913f2f7a43469da7ce141cdd", size = 1551177 },
+    { url = "https://files.pythonhosted.org/packages/72/99/2a0987854d0abfe34e6067f8a3697d085734093aac6a47ed63461b9f9c56/open_wallet_standard-1.1.2-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ab6b6aeb565ece437633cfb1adfc5f5594d9789867c444186076b1f1a407f4c7", size = 1493091 },
+    { url = "https://files.pythonhosted.org/packages/b2/3f/47cfb0bc6a888547e350b0c4ffc2f12f1c15ce9254c0fdd4990c68907ebd/open_wallet_standard-1.1.2-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:212d295e4f08e6fa2198482a858269161d6f80593dc69d2c9b4694b43f145fa5", size = 1670237 },
+    { url = "https://files.pythonhosted.org/packages/72/5b/326f0f507fedfb132b0a7edfd75a310f7e1d0df333a0c2ff6c6037dff8db/open_wallet_standard-1.1.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:46ca38166c7b54acd535b6a8ad355b145bb80b9775cb7a8f9dbd2fc849e3b3e6", size = 1692146 },
+    { url = "https://files.pythonhosted.org/packages/da/3a/e5977d30919632134a19416fa6ed0955c86e045f57b1b3f1046da910c897/open_wallet_standard-1.1.2-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:691a03755b8996c9e20236576d1c623b365ec6ba7120edc2dc138d62d1a21d98", size = 1551097 },
+    { url = "https://files.pythonhosted.org/packages/c2/e3/bd5169d3d15039981ccace618241f5fe2b54b502e6e376a7a88150208908/open_wallet_standard-1.1.2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:237654fb0b44168e415c9b9ae708eb040195312c3cf61a050ce4c96b5a35e21b", size = 1493329 },
+    { url = "https://files.pythonhosted.org/packages/f4/82/04f4928d15d47a452bf32342d62e1509d1a01108e6abfcfc305f4019131b/open_wallet_standard-1.1.2-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:99c8dffb7ad3e91a2c29f1073ed08e712005d76389863def6b6af3a867d30588", size = 1670697 },
+    { url = "https://files.pythonhosted.org/packages/d5/f6/ac5ffc3b6f247adcfbe09ba158253c6ede78c773cb6bf7c03510e5e4df04/open_wallet_standard-1.1.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:af5e7a0a75d9081dc5540663af09ef92ce21882eae1b3ee2ecde17f66f5222d4", size = 1691825 },
 ]
 
 [[package]]

@@ -1,0 +1,14 @@
+{
+  "name": "Finance Director",
+  "description": "Specialized agent for treasury, risk analysis, and payment settlement.",
+  "protocols": ["a2a", "x402", "ows", "ucp"],
+  "endpoints": {
+    "a2a": "/v1/a2a",
+    "x402": "/v1/payments"
+  },
+  "capabilities": [
+    "risk-analysis",
+    "micropayment-settlement",
+    "currency-exchange"
+  ]
+}

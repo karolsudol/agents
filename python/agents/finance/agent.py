@@ -1,6 +1,7 @@
 from google.adk.agents import Agent
 from currency.agent import root_agent as treasury_agent
 from spanner.agent import root_agent as spanner_agent
+from finance.ucp_tools import get_ucp_quote, place_ucp_order
 from constants import DEFAULT_MODEL
 
 # specialist 1: The Data Gatherer (Used by Risk)
@@ -36,11 +37,17 @@ risk_analyst = Agent(
 finance_director = Agent(
     name="finance_director",
     model=DEFAULT_MODEL,
-    description="Head of Finance. Manages Treasury and Risk.",
+    description="Head of Finance. Manages Treasury, Risk, and Procurement.",
     instruction="""You are the Finance Director.
     - For currency/FX: Delegate to 'treasury_agent'.
     - For risk/fraud/audit: Delegate to 'risk_analyst'.
-    - For Spanner graph queries: Delegate to 'spanner_agent'.""",
+    - For Spanner graph queries: Delegate to 'spanner_agent'.
+
+    COMMERCE CAPABILITIES (UCP):
+    - Use 'get_ucp_quote' for standardized supplier discovery and quoting.
+    - Use 'place_ucp_order' for placing orders using consistent UCP schemas.
+    - Coordinate with 'treasury_agent' to ensure x402 payment proof is available for orders.""",
+    tools=[get_ucp_quote, place_ucp_order],
     sub_agents=[treasury_agent, risk_analyst, spanner_agent],
 )
 
